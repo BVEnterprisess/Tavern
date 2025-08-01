@@ -62,16 +62,53 @@ export class AdminModule {
         const resultContainer = document.getElementById('ocrResultContainer');
         
         if (file && preview && previewContainer && resultContainer) {
-            const reader = new FileReader();
+            // Optimize image before display
+            this.optimizeImage(file).then(optimizedBlob => {
+                const reader = new FileReader();
+                
+                reader.onload = (e) => {
+                    preview.src = e.target.result;
+                    previewContainer.classList.remove('hidden');
+                    resultContainer.classList.add('hidden');
+                };
+                
+                reader.readAsDataURL(optimizedBlob);
+            });
+        }
+    }
+
+    async optimizeImage(file) {
+        return new Promise((resolve) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
             
-            reader.onload = (e) => {
-                preview.src = e.target.result;
-                previewContainer.classList.remove('hidden');
-                resultContainer.classList.add('hidden');
+            img.onload = () => {
+                // Calculate optimal dimensions
+                const maxWidth = 800;
+                const maxHeight = 600;
+                let { width, height } = img;
+                
+                if (width > maxWidth) {
+                    height = (height * maxWidth) / width;
+                    width = maxWidth;
+                }
+                if (height > maxHeight) {
+                    width = (width * maxHeight) / height;
+                    height = maxHeight;
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                
+                // Draw optimized image
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                canvas.toBlob(resolve, 'image/jpeg', 0.8);
             };
             
-            reader.readAsDataURL(file);
-        }
+            img.src = URL.createObjectURL(file);
+        });
     }
 
     async processOCR() {
@@ -93,9 +130,18 @@ export class AdminModule {
         ocrResult.innerHTML = '<p class="text-center"><i class="fas fa-spinner fa-spin mr-2"></i> Processing image with enhanced OCR...</p>';
         resultContainer.classList.remove('hidden');
         
+        const startTime = performance.now();
+        
         try {
             // Use enhanced OCR service
             const result = await this.ocrService.processImage(fileUpload.files[0]);
+            
+            const processingTime = performance.now() - startTime;
+            
+            // Track performance
+            if (this.app.services.monitor) {
+                this.app.services.monitor.trackOCRProcessing(processingTime, result.confidence);
+            }
             
             // Update state with results
             this.state.ocrData = {

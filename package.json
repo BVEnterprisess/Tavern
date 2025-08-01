@@ -9,13 +9,17 @@
     "build:css": "postcss src/css/main.css -o dist/css/main.css",
     "build:js": "webpack --mode=production",
     "build:dev": "webpack --mode=development",
+    "build:prod": "npm run build:css && webpack --mode=production --optimize-minimize",
+    "analyze": "webpack --mode=production --analyze",
     "test": "jest",
     "lint": "eslint src/js/**/*.js",
-    "format": "prettier --write src/**/*.{js,css,html}"
+    "format": "prettier --write src/**/*.{js,css,html}",
+    "clean": "rimraf dist",
+    "prebuild": "npm run clean"
   },
   "dependencies": {
-    "tesseract.js": "^4.1.1",
-    "axios": "^1.6.0"
+    "axios": "^1.6.0",
+    "tesseract.js": "^4.1.1"
   },
   "devDependencies": {
     "@babel/core": "^7.23.0",
@@ -29,11 +33,17 @@
     "postcss-cli": "^10.1.0",
     "postcss-preset-env": "^9.1.0",
     "prettier": "^3.0.3",
+    "rimraf": "^5.0.10",
     "style-loader": "^3.3.3",
     "webpack": "^5.88.0",
     "webpack-cli": "^5.1.0"
   },
-  "keywords": ["bar-management", "inventory", "restaurant", "table1837"],
+  "keywords": [
+    "bar-management",
+    "inventory",
+    "restaurant",
+    "table1837"
+  ],
   "author": "John Patrick",
   "license": "PROPRIETARY"
-} 
+}

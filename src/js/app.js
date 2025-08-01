@@ -1,6 +1,7 @@
 
 import { AuthService } from './services/authService.js';
 import { PerformanceService } from './services/performanceService.js';
+import { PerformanceMonitor } from './services/performanceMonitor.js';
 import { SearchService } from './services/searchService.js';
 import { ThemeService } from './services/themeService.js';
 import { DashboardModule } from './modules/dashboard.js';
@@ -8,6 +9,7 @@ import { StaffModule } from './modules/staff.js';
 import { AdminModule } from './modules/admin.js';
 import { WineModule } from './modules/wine.js';
 import { InventoryModule } from './modules/inventory.js';
+import { PerformanceModule } from './modules/performance.js';
 
 export class Table1837App {
     constructor() {
@@ -42,6 +44,47 @@ export class Table1837App {
         this.setupEventListeners();
         this.setupNavigation();
         this.setupEnhancedFeatures();
+        this.registerServiceWorker();
+        this.startPerformanceMonitoring();
+    }
+
+    startPerformanceMonitoring() {
+        // Monitor long tasks
+        if ('PerformanceObserver' in window) {
+            const observer = new PerformanceObserver((list) => {
+                for (const entry of list.getEntries()) {
+                    if (entry.duration > 50) { // Tasks longer than 50ms
+                        console.warn('⚠️ Long task detected:', entry.duration.toFixed(2), 'ms');
+                    }
+                }
+            });
+            observer.observe({ entryTypes: ['longtask'] });
+        }
+
+        // Monitor memory usage
+        setInterval(() => {
+            if ('memory' in performance) {
+                const memory = performance.memory;
+                const usedMB = memory.usedJSHeapSize / 1024 / 1024;
+                const totalMB = memory.totalJSHeapSize / 1024 / 1024;
+                
+                if (usedMB > 100) {
+                    console.warn('⚠️ High memory usage:', usedMB.toFixed(2), 'MB /', totalMB.toFixed(2), 'MB');
+                }
+            }
+        }, 10000);
+    }
+
+    registerServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => {
+                    console.log('✅ Service Worker registered:', registration);
+                })
+                .catch(error => {
+                    console.error('❌ Service Worker registration failed:', error);
+                });
+        }
     }
 
     cacheElements() {
@@ -55,19 +98,71 @@ export class Table1837App {
 
     initializeModules() {
         console.log('🚀 Initializing Table 1837 modules...');
+        // Initialize only dashboard initially, others will be lazy loaded
         this.modules.dashboard = new DashboardModule(this);
-        this.modules.staff = new StaffModule(this);
-        this.modules.admin = new AdminModule(this);
-        this.modules.wine = new WineModule(this);
-        this.modules.inventory = new InventoryModule(this);
+        this.modules.dashboard.initialize();
         
-        // Initialize all modules
-        Object.values(this.modules).forEach(module => {
-            if (module.initialize) {
-                module.initialize();
-            }
-        });
-        console.log('✅ All modules initialized successfully');
+        // Initialize performance module
+        this.modules.performance = new PerformanceModule(this);
+        this.modules.performance.initialize();
+        
+        // Lazy load other modules when needed
+        this.modules.staff = null;
+        this.modules.admin = null;
+        this.modules.wine = null;
+        this.modules.inventory = null;
+        
+        console.log('✅ Core modules initialized successfully');
+    }
+
+    async loadModule(moduleName) {
+        if (this.modules[moduleName] && this.modules[moduleName] !== null) {
+            return this.modules[moduleName];
+        }
+
+        const startTime = performance.now();
+        console.log(`🔄 Loading module: ${moduleName}`);
+        
+        let module;
+        switch (moduleName) {
+            case 'staff':
+                if (!this.modules.staff) {
+                    this.modules.staff = new StaffModule(this);
+                    this.modules.staff.initialize();
+                }
+                module = this.modules.staff;
+                break;
+            case 'admin':
+                if (!this.modules.admin) {
+                    this.modules.admin = new AdminModule(this);
+                    this.modules.admin.initialize();
+                }
+                module = this.modules.admin;
+                break;
+            case 'wine':
+                if (!this.modules.wine) {
+                    this.modules.wine = new WineModule(this);
+                    this.modules.wine.initialize();
+                }
+                module = this.modules.wine;
+                break;
+            case 'inventory':
+                if (!this.modules.inventory) {
+                    this.modules.inventory = new InventoryModule(this);
+                    this.modules.inventory.initialize();
+                }
+                module = this.modules.inventory;
+                break;
+            default:
+                module = this.modules[moduleName];
+        }
+        
+        const loadTime = performance.now() - startTime;
+        if (this.services.monitor) {
+            this.services.monitor.trackModuleLoad(moduleName, loadTime);
+        }
+        
+        return module;
     }
 
     setupEventListeners() {
@@ -99,15 +194,7 @@ export class Table1837App {
     initializeServices() {
         // Initialize enhanced services
         this.services.performance = new PerformanceService();
-        this.services.search = new SearchService();
-        this.services.theme = new ThemeService();
-        
-        console.log('🚀 Enhanced services initialized');
-    }
-    
-    initializeServices() {
-        // Initialize enhanced services
-        this.services.performance = new PerformanceService();
+        this.services.monitor = new PerformanceMonitor();
         this.services.search = new SearchService();
         this.services.theme = new ThemeService();
         
@@ -189,11 +276,16 @@ export class Table1837App {
         this.init();
     }
 
-    showTab(tabName) {
+    async showTab(tabName) {
         // Hide all tab contents
         document.querySelectorAll('.tab-content').forEach(content => {
             content.classList.add('hidden');
         });
+        
+        // Load module if needed
+        if (tabName !== 'dashboard') {
+            await this.loadModule(tabName);
+        }
         
         // Show selected tab content
         const targetTab = document.getElementById(tabName + '-content');
@@ -210,10 +302,31 @@ export class Table1837App {
         
         // Cleanup modules
         Object.values(this.modules).forEach(module => {
-            if (module.cleanup) {
+            if (module && module.cleanup) {
                 module.cleanup();
             }
         });
+
+        // Clear caches
+        this.clearCaches();
+        
+        // Force garbage collection if available
+        if (window.gc) {
+            window.gc();
+        }
+    }
+
+    clearCaches() {
+        // Clear OCR cache
+        if (this.modules.admin && this.modules.admin.ocrService) {
+            this.modules.admin.ocrService.cache.clear();
+        }
+        
+        // Clear search cache
+        if (this.services.search) {
+            this.services.search.lastQuery = '';
+            this.services.search.lastResults = null;
+        }
     }
 
     updateState(newState) {
@@ -229,7 +342,10 @@ export class Table1837App {
     showToast(message, type = 'info') {
         // Create toast element
         const toast = document.createElement('div');
-        toast.className = `fixed bottom-4 right-4 bg-dark-green text-white py-2 px-4 rounded-lg shadow-lg z-50 animate-fade-in-up`;
+        const bgColor = type === 'success' ? 'bg-green-600' : 
+                       type === 'error' ? 'bg-red-600' : 
+                       type === 'warning' ? 'bg-yellow-600' : 'bg-dark-green';
+        toast.className = `fixed bottom-4 right-4 ${bgColor} text-white py-2 px-4 rounded-lg shadow-lg z-50 animate-fade-in-up`;
         toast.textContent = message;
         
         // Append to body
@@ -244,6 +360,22 @@ export class Table1837App {
                 }
             }, 500);
         }, 3000);
+    }
+
+    handleError(error, context = '') {
+        console.error(`❌ Error in ${context}:`, error);
+        
+        // Log to performance service if available
+        if (this.services.performance) {
+            this.services.performance.metrics.errors.push({
+                message: error.message,
+                context: context,
+                timestamp: Date.now()
+            });
+        }
+        
+        // Show user-friendly error message
+        this.showToast(`An error occurred: ${error.message}`, 'error');
     }
     
     setupEnhancedFeatures() {

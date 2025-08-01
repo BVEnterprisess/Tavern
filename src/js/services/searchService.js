@@ -7,6 +7,8 @@ export class SearchService {
     constructor() {
         this.searchIndex = new Map();
         this.buildIndex();
+        this.debounceTimer = null;
+        this.lastQuery = '';
     }
     
     buildIndex() {
@@ -44,9 +46,23 @@ export class SearchService {
         
         return terms;
     }
-    
+
+    debounceSearch(func, wait) {
+        return (...args) => {
+            clearTimeout(this.debounceTimer);
+            this.debounceTimer = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
+
     search(query, filters = {}) {
         if (!query || query.length < 2) return [];
+        
+        // Avoid duplicate searches
+        if (query === this.lastQuery) {
+            return this.lastResults || [];
+        }
+        
+        this.lastQuery = query;
         
         const results = new Set();
         const searchTerms = this.generateSearchTerms({ name: query });
@@ -71,7 +87,8 @@ export class SearchService {
             );
         }
         
-        return filteredResults.slice(0, 20); // Limit results
+        this.lastResults = filteredResults.slice(0, 20);
+        return this.lastResults;
     }
     
     getAllWines() {

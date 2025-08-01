@@ -1,10 +1,11 @@
-import { OCRService } from '../services/ocrService.js';
+import { UltraEnhancedOCRService } from '../services/ultraEnhancedOcrService.js';
 
 export class AdminModule {
     constructor(app) {
         this.app = app;
         this.state = app.state;
         this.elements = app.elements;
+        this.ocrService = new UltraEnhancedOCRService();
     }
 
     initialize() {
@@ -29,6 +30,11 @@ export class AdminModule {
         const preview = document.getElementById('ocrPreview');
         const processBtn = document.getElementById('processOcrButton');
         const applyBtn = document.getElementById('applyOcrButton');
+        
+        // Set up progress callback
+        this.ocrService.setProgressCallback(({ percent, message }) => {
+            this.updateOCRProgress(percent, message);
+        });
         
         if (fileUpload) {
             fileUpload.addEventListener('change', (e) => {
@@ -68,15 +74,54 @@ export class AdminModule {
         }
     }
 
-    processOCR() {
-        const preview = document.getElementById('ocrPreview');
+    async processOCR() {
+        const fileUpload = document.getElementById('ocrFileUpload');
+        const processBtn = document.getElementById('processOcrButton');
         const resultContainer = document.getElementById('ocrResultContainer');
         const ocrResult = document.getElementById('ocrResult');
         
-        if (!preview || !resultContainer || !ocrResult) return;
+        if (!fileUpload.files[0]) {
+            alert('Please select an image first.');
+            return;
+        }
         
-        // Simulate OCR processing
-        this.simulateOCR(preview.src);
+        // Show loading state
+        processBtn.disabled = true;
+        processBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+        
+        // Show processing message
+        ocrResult.innerHTML = '<p class="text-center"><i class="fas fa-spinner fa-spin mr-2"></i> Processing image with enhanced OCR...</p>';
+        resultContainer.classList.remove('hidden');
+        
+        try {
+            // Use enhanced OCR service
+            const result = await this.ocrService.processImage(fileUpload.files[0]);
+            
+            // Update state with results
+            this.state.ocrData = {
+                redWine: result.redWine,
+                whiteWine: result.whiteWine,
+                starters: result.starters || [],
+                entrees: result.entrees || [],
+                cocktail: result.cocktail,
+                confidence: result.confidence
+            };
+            
+            // Display the results
+            this.displayOCRResults();
+            
+            // Show confidence score
+            if (result.confidence) {
+                this.showConfidenceScore(result.confidence);
+            }
+        } catch (error) {
+            console.error('OCR processing failed:', error);
+            ocrResult.innerHTML = '<p class="text-red-500">OCR processing failed. Please try again.</p>';
+        } finally {
+            // Reset button state
+            processBtn.disabled = false;
+            processBtn.innerHTML = '<i class="fas fa-magic mr-2"></i> Process Image';
+        }
     }
 
     simulateOCR(imageSource) {
@@ -130,26 +175,96 @@ export class AdminModule {
         const ocrResult = document.getElementById('ocrResult');
         if (!ocrResult) return;
         
-        const resultHtml = `
-            <h4 class="font-bold text-yellow-400 mb-2">Featured Wines:</h4>
-            <p><span class="font-semibold">Red:</span> ${this.state.ocrData.redWine.name} - ${this.state.ocrData.redWine.price} (${this.state.ocrData.redWine.code})</p>
-            <p><span class="font-semibold">White:</span> ${this.state.ocrData.whiteWine.name} - ${this.state.ocrData.whiteWine.price} (${this.state.ocrData.whiteWine.code})</p>
-            
-            <h4 class="font-bold text-yellow-400 mt-4 mb-2">Starters:</h4>
-            <ul class="list-disc pl-4 mb-2">
-                ${this.state.ocrData.starters.map(item => `<li>${item}</li>`).join('')}
-            </ul>
-            
-            <h4 class="font-bold text-yellow-400 mt-4 mb-2">Entrees:</h4>
-            <ul class="list-disc pl-4 mb-2">
-                ${this.state.ocrData.entrees.map(item => `<li>${item}</li>`).join('')}
-            </ul>
-            
-            <h4 class="font-bold text-yellow-400 mt-4 mb-2">Featured Cocktail:</h4>
-            <p>${this.state.ocrData.cocktail.name} - ${this.state.ocrData.cocktail.price}</p>
-            <p class="text-sm text-gray-400">${this.state.ocrData.cocktail.description}</p>
-        `;
+        let resultHtml = '<div class="space-y-4">';
         
+        // Display wines with confidence indicators
+        if (this.state.ocrData.redWine || this.state.ocrData.whiteWine) {
+            resultHtml += '<h4 class="font-bold text-yellow-400 mb-2">Featured Wines:</h4>';
+            
+            if (this.state.ocrData.redWine) {
+                const confidence = Math.round((this.state.ocrData.redWine.confidence || 0.9) * 100);
+                const confidenceColor = confidence >= 97 ? 'text-green-400' : confidence >= 90 ? 'text-yellow-400' : 'text-red-400';
+                resultHtml += `
+                    <div class="bg-black bg-opacity-20 p-3 rounded-lg mb-2">
+                        <p><span class="font-semibold">Red:</span> ${this.state.ocrData.redWine.name} - ${this.state.ocrData.redWine.price}</p>
+                        <p class="text-sm text-gray-400">${this.state.ocrData.redWine.region} ${this.state.ocrData.redWine.year ? `(${this.state.ocrData.redWine.year})` : ''}</p>
+                        <div class="flex items-center mt-1">
+                            <span class="text-xs ${confidenceColor}">Confidence: ${confidence}%</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (this.state.ocrData.whiteWine) {
+                const confidence = Math.round((this.state.ocrData.whiteWine.confidence || 0.9) * 100);
+                const confidenceColor = confidence >= 97 ? 'text-green-400' : confidence >= 90 ? 'text-yellow-400' : 'text-red-400';
+                resultHtml += `
+                    <div class="bg-black bg-opacity-20 p-3 rounded-lg mb-2">
+                        <p><span class="font-semibold">White:</span> ${this.state.ocrData.whiteWine.name} - ${this.state.ocrData.whiteWine.price}</p>
+                        <p class="text-sm text-gray-400">${this.state.ocrData.whiteWine.region} ${this.state.ocrData.whiteWine.year ? `(${this.state.ocrData.whiteWine.year})` : ''}</p>
+                        <div class="flex items-center mt-1">
+                            <span class="text-xs ${confidenceColor}">Confidence: ${confidence}%</span>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Display starters
+        if (this.state.ocrData.starters && this.state.ocrData.starters.length > 0) {
+            resultHtml += '<h4 class="font-bold text-yellow-400 mt-4 mb-2">Starters:</h4>';
+            resultHtml += '<ul class="list-disc pl-4 mb-2">';
+            this.state.ocrData.starters.forEach(item => {
+                const name = typeof item === 'string' ? item : item.name;
+                const confidence = typeof item === 'string' ? 0.9 : (item.confidence || 0.9);
+                const confidencePercent = Math.round(confidence * 100);
+                const confidenceColor = confidencePercent >= 97 ? 'text-green-400' : confidencePercent >= 90 ? 'text-yellow-400' : 'text-red-400';
+                resultHtml += `
+                    <li class="mb-1">
+                        ${name}
+                        <span class="text-xs ${confidenceColor} ml-2">(${confidencePercent}%)</span>
+                    </li>
+                `;
+            });
+            resultHtml += '</ul>';
+        }
+        
+        // Display entrees
+        if (this.state.ocrData.entrees && this.state.ocrData.entrees.length > 0) {
+            resultHtml += '<h4 class="font-bold text-yellow-400 mt-4 mb-2">Entrees:</h4>';
+            resultHtml += '<ul class="list-disc pl-4 mb-2">';
+            this.state.ocrData.entrees.forEach(item => {
+                const name = typeof item === 'string' ? item : item.name;
+                const confidence = typeof item === 'string' ? 0.9 : (item.confidence || 0.9);
+                const confidencePercent = Math.round(confidence * 100);
+                const confidenceColor = confidencePercent >= 97 ? 'text-green-400' : confidencePercent >= 90 ? 'text-yellow-400' : 'text-red-400';
+                resultHtml += `
+                    <li class="mb-1">
+                        ${name}
+                        <span class="text-xs ${confidenceColor} ml-2">(${confidencePercent}%)</span>
+                    </li>
+                `;
+            });
+            resultHtml += '</ul>';
+        }
+        
+        // Display cocktail
+        if (this.state.ocrData.cocktail) {
+            resultHtml += '<h4 class="font-bold text-yellow-400 mt-4 mb-2">Featured Cocktail:</h4>';
+            const confidence = Math.round((this.state.ocrData.cocktail.confidence || 0.9) * 100);
+            const confidenceColor = confidence >= 97 ? 'text-green-400' : confidence >= 90 ? 'text-yellow-400' : 'text-red-400';
+            resultHtml += `
+                <div class="bg-black bg-opacity-20 p-3 rounded-lg">
+                    <p>${this.state.ocrData.cocktail.name} - ${this.state.ocrData.cocktail.price}</p>
+                    <p class="text-sm text-gray-400">${this.state.ocrData.cocktail.description || ''}</p>
+                    <div class="flex items-center mt-1">
+                        <span class="text-xs ${confidenceColor}">Confidence: ${confidence}%</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        resultHtml += '</div>';
         ocrResult.innerHTML = resultHtml;
     }
     
@@ -168,7 +283,7 @@ export class AdminModule {
             if (wineName) wineName.textContent = this.state.ocrData.redWine.name;
             if (wineRegion) wineRegion.textContent = this.state.ocrData.redWine.region;
             if (winePrice) winePrice.textContent = this.state.ocrData.redWine.price;
-            if (wineCode) wineCode.textContent = `(${this.state.ocrData.redWine.code})`;
+            if (wineCode) wineCode.textContent = `(${this.state.ocrData.redWine.code || 'N/A'})`;
         }
         
         // White wine
@@ -182,48 +297,91 @@ export class AdminModule {
             if (wineName) wineName.textContent = this.state.ocrData.whiteWine.name;
             if (wineRegion) wineRegion.textContent = this.state.ocrData.whiteWine.region;
             if (winePrice) winePrice.textContent = this.state.ocrData.whiteWine.price;
-            if (wineCode) wineCode.textContent = `(${this.state.ocrData.whiteWine.code})`;
+            if (wineCode) wineCode.textContent = `(${this.state.ocrData.whiteWine.code || 'N/A'})`;
         }
         
         // Update food specials
         if (this.state.ocrData.starters && this.state.ocrData.starters.length >= 2) {
             const foodSpecials = document.querySelectorAll('.food-special-card .grid div p');
-            if (foodSpecials[0]) foodSpecials[0].textContent = this.state.ocrData.starters[0];
-            if (foodSpecials[1]) foodSpecials[1].textContent = this.state.ocrData.starters[1] || '';
+            const starter1 = typeof this.state.ocrData.starters[0] === 'string' ? 
+                this.state.ocrData.starters[0] : this.state.ocrData.starters[0].name;
+            const starter2 = typeof this.state.ocrData.starters[1] === 'string' ? 
+                this.state.ocrData.starters[1] : this.state.ocrData.starters[1]?.name || '';
+            
+            if (foodSpecials[0]) foodSpecials[0].textContent = starter1;
+            if (foodSpecials[1]) foodSpecials[1].textContent = starter2;
         }
         
         // Update entree as soup of the day
         if (this.state.ocrData.entrees && this.state.ocrData.entrees.length > 0) {
             const foodSpecials = document.querySelectorAll('.food-special-card .grid div p');
-            if (foodSpecials[2]) foodSpecials[2].textContent = this.state.ocrData.entrees[0];
+            const entree = typeof this.state.ocrData.entrees[0] === 'string' ? 
+                this.state.ocrData.entrees[0] : this.state.ocrData.entrees[0].name;
+            
+            if (foodSpecials[2]) foodSpecials[2].textContent = entree;
         }
         
-        // Update cocktail special if today doesn't have a special
-        const todaySpecial = document.getElementById('todaySpecial');
-        if (this.state.ocrData.cocktail && todaySpecial && todaySpecial.textContent.includes('No special offerings today')) {
-            todaySpecial.innerHTML = `
-                <div class="flex justify-between items-start mb-3">
-                    <h4 class="text-xl font-bold">${this.state.ocrData.cocktail.name}</h4>
-                    <span class="text-lg font-bold text-yellow-400">${this.state.ocrData.cocktail.price}</span>
+        // Show success message with confidence
+        const overallConfidence = this.state.ocrData.confidence || 0.95;
+        const confidencePercent = Math.round(overallConfidence * 100);
+        const message = confidencePercent >= 97 ? 
+            `OCR results applied successfully! (${confidencePercent}% accuracy)` :
+            `OCR results applied successfully! (${confidencePercent}% accuracy - please verify)`;
+        
+        this.showToast(message, confidencePercent >= 97 ? 'success' : 'warning');
+    }
+    
+    updateOCRProgress(percent, message) {
+        const processBtn = document.getElementById('processOcrButton');
+        const ocrResult = document.getElementById('ocrResult');
+        
+        if (processBtn) {
+            processBtn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i>${message} (${percent}%)`;
+        }
+        
+        if (ocrResult && percent < 100) {
+            ocrResult.innerHTML = `<p class="text-center"><i class="fas fa-spinner fa-spin mr-2"></i> ${message} (${percent}%)</p>`;
+        }
+    }
+    
+    showConfidenceScore(confidence) {
+        const confidencePercent = Math.round(confidence * 100);
+        const confidenceColor = confidencePercent >= 97 ? 'text-green-400' : 
+                               confidencePercent >= 90 ? 'text-yellow-400' : 'text-red-400';
+        
+        const confidenceHtml = `
+            <div class="mt-4 p-3 bg-black bg-opacity-30 rounded-lg">
+                <h4 class="font-bold ${confidenceColor} mb-2">OCR Confidence Score</h4>
+                <div class="flex items-center">
+                    <div class="flex-1 bg-gray-700 rounded-full h-2 mr-3">
+                        <div class="bg-green-500 h-2 rounded-full" style="width: ${confidencePercent}%"></div>
+                    </div>
+                    <span class="text-sm ${confidenceColor} font-bold">${confidencePercent}%</span>
                 </div>
-                <p class="text-gray-300">${this.state.ocrData.cocktail.description}</p>
-            `;
+                <p class="text-xs text-gray-400 mt-1">
+                    ${confidencePercent >= 97 ? 'Excellent accuracy!' : 
+                      confidencePercent >= 90 ? 'Good accuracy' : 'Lower accuracy - please verify results'}
+                </p>
+            </div>
+        `;
+        
+        const ocrResult = document.getElementById('ocrResult');
+        if (ocrResult) {
+            ocrResult.innerHTML += confidenceHtml;
         }
+    }
+    
+    showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        const bgColor = type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-600' : 'bg-blue-600';
+        toast.className = `fixed bottom-4 right-4 ${bgColor} text-white py-2 px-4 rounded-lg shadow-lg z-50`;
+        toast.textContent = message;
         
-        alert('Dashboard updated successfully with OCR data!');
+        document.body.appendChild(toast);
         
-        // Reset OCR interface
-        const fileUpload = document.getElementById('ocrFileUpload');
-        const previewContainer = document.getElementById('ocrPreviewContainer');
-        const resultContainer = document.getElementById('ocrResultContainer');
-        
-        if (fileUpload) fileUpload.value = '';
-        if (previewContainer) previewContainer.classList.add('hidden');
-        if (resultContainer) resultContainer.classList.add('hidden');
-        
-        // Switch to dashboard tab to show updates
-        const dashboardTab = document.querySelector('[data-tab="dashboard"]');
-        if (dashboardTab) dashboardTab.click();
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
     }
 
     handleMessageSubmit(event) {

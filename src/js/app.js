@@ -46,6 +46,7 @@ export class Table1837App {
     }
 
     initializeModules() {
+        console.log('🚀 Initializing Table 1837 modules...');
         this.modules.dashboard = new DashboardModule(this);
         this.modules.staff = new StaffModule(this);
         this.modules.admin = new AdminModule(this);
@@ -58,6 +59,7 @@ export class Table1837App {
                 module.initialize();
             }
         });
+        console.log('✅ All modules initialized successfully');
     }
 
     setupEventListeners() {

@@ -1,5 +1,8 @@
 import { OCRService } from './services/ocrService.js';
 import { AuthService } from './services/authService.js';
+import { PerformanceService } from './services/performanceService.js';
+import { SearchService } from './services/searchService.js';
+import { ThemeService } from './services/themeService.js';
 import { DashboardModule } from './modules/dashboard.js';
 import { StaffModule } from './modules/staff.js';
 import { AdminModule } from './modules/admin.js';
@@ -24,6 +27,10 @@ export class Table1837App {
         
         this.elements = {};
         this.modules = {};
+        this.services = {};
+        
+        // Initialize enhanced services
+        this.initializeServices();
         
         // Expose functions globally for onclick handlers
         window.logout = () => this.logout();
@@ -34,6 +41,7 @@ export class Table1837App {
         this.initializeModules();
         this.setupEventListeners();
         this.setupNavigation();
+        this.setupEnhancedFeatures();
     }
 
     cacheElements() {
@@ -86,6 +94,82 @@ export class Table1837App {
                 }
             });
         });
+    }
+    
+    initializeServices() {
+        // Initialize enhanced services
+        this.services.performance = new PerformanceService();
+        this.services.search = new SearchService();
+        this.services.theme = new ThemeService();
+        
+        console.log('🚀 Enhanced services initialized');
+    }
+    
+    initializeServices() {
+        // Initialize enhanced services
+        this.services.performance = new PerformanceService();
+        this.services.search = new SearchService();
+        this.services.theme = new ThemeService();
+        
+        console.log('🚀 Enhanced services initialized');
+    }
+    
+    setupEnhancedFeatures() {
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'k':
+                        e.preventDefault();
+                        this.focusSearch();
+                        break;
+                    case 't':
+                        e.preventDefault();
+                        this.services.theme.toggleTheme();
+                        break;
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                        e.preventDefault();
+                        const tabs = ['dashboard', 'staff', 'admin', 'wine', 'inventory'];
+                        const tabIndex = parseInt(e.key) - 1;
+                        if (tabIndex < tabs.length) {
+                            this.showTab(tabs[tabIndex]);
+                        }
+                        break;
+                }
+            }
+        });
+        
+        // Add search functionality to wine tab
+        const wineSearch = document.getElementById('wineSearch');
+        if (wineSearch) {
+            wineSearch.addEventListener('input', (e) => {
+                const query = e.target.value;
+                if (query.length > 1) {
+                    const results = this.services.search.search(query);
+                    this.updateWineResults(results);
+                }
+            });
+        }
+    }
+    
+    focusSearch() {
+        const searchInputs = document.querySelectorAll('input[type="text"]');
+        if (searchInputs.length > 0) {
+            searchInputs[0].focus();
+        }
+    }
+    
+    updateWineResults(results) {
+        // Update wine display with search results
+        const wineCategories = document.getElementById('wineCategories');
+        if (wineCategories && results.length > 0) {
+            // Implementation for updating wine results
+            console.log('Search results:', results);
+        }
     }
 
     handleLogin() {
@@ -160,6 +244,109 @@ export class Table1837App {
                 }
             }, 500);
         }, 3000);
+    }
+    
+    setupEnhancedFeatures() {
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'k':
+                        e.preventDefault();
+                        this.focusSearch();
+                        break;
+                    case 't':
+                        e.preventDefault();
+                        this.services.theme.toggleTheme();
+                        break;
+                }
+            }
+        });
+        
+        // Add search functionality to wine tab
+        const wineSearch = document.getElementById('wineSearch');
+        if (wineSearch) {
+            wineSearch.addEventListener('input', (e) => {
+                const query = e.target.value;
+                if (query.length > 1) {
+                    const results = this.services.search.search(query);
+                    this.updateWineResults(results);
+                }
+            });
+        }
+    }
+    
+    focusSearch() {
+        const searchInputs = document.querySelectorAll('input[type="text"]');
+        if (searchInputs.length > 0) {
+            searchInputs[0].focus();
+        }
+    }
+    
+    updateWineResults(results) {
+        // Update wine display with search results
+        const wineCategories = document.getElementById('wineCategories');
+        if (wineCategories && results.length > 0) {
+            console.log('Search results:', results);
+        }
+    }
+    
+    setupEnhancedFeatures() {
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'k':
+                        e.preventDefault();
+                        this.focusSearch();
+                        break;
+                    case 't':
+                        e.preventDefault();
+                        this.services.theme.toggleTheme();
+                        break;
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                        e.preventDefault();
+                        const tabs = ['dashboard', 'staff', 'admin', 'wine', 'inventory'];
+                        const tabIndex = parseInt(e.key) - 1;
+                        if (tabIndex < tabs.length) {
+                            this.showTab(tabs[tabIndex]);
+                        }
+                        break;
+                }
+            }
+        });
+        
+        // Add search functionality to wine tab
+        const wineSearch = document.getElementById('wineSearch');
+        if (wineSearch) {
+            wineSearch.addEventListener('input', (e) => {
+                const query = e.target.value;
+                if (query.length > 1) {
+                    const results = this.services.search.search(query);
+                    this.updateWineResults(results);
+                }
+            });
+        }
+    }
+    
+    focusSearch() {
+        const searchInputs = document.querySelectorAll('input[type="text"]');
+        if (searchInputs.length > 0) {
+            searchInputs[0].focus();
+        }
+    }
+    
+    updateWineResults(results) {
+        // Update wine display with search results
+        const wineCategories = document.getElementById('wineCategories');
+        if (wineCategories && results.length > 0) {
+            // Implementation for updating wine results
+            console.log('Search results:', results);
+        }
     }
 }
 

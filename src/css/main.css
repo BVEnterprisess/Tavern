@@ -1,5 +1,8 @@
 /* Table 1837 Bar Management System - Main Styles */
 
+/* Import enhanced styles */
+@import url('./enhanced.css');
+
 * {
     font-family: 'EB Garamond', serif;
 }

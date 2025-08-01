@@ -1,0 +1,228 @@
+/* Table 1837 Bar Management System - Main Styles */
+
+* {
+    font-family: 'EB Garamond', serif;
+}
+
+.login-bg {
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.stockcake.com/public/f/3/c/f3cab94a-6edb-44f9-adf2-c82fa6e8b374_large/elegant-cocktail-evening-stockcake.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+.dashboard-bg {
+    background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('https://images.stockcake.com/public/8/d/5/8d55dbe0-ce4f-482a-b3a9-5000a21a7865_large/pouring-espresso-martini-stockcake.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+.inventory-bg {
+    background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.85)), url('https://images.stockcake.com/public/2/3/8/238c9ec4-c6e0-4029-a30e-98096ca972c2_large/bartender-serving-cocktail-stockcake.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+.wine-bg {
+    background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('https://images.stockcake.com/public/d/a/b/dab87a2c-70ec-4978-8543-bb77a6184733_large/elegant-cocktail-served-stockcake.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+.staff-bg {
+    background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('https://images.stockcake.com/public/7/6/a/76adceb7-c734-49b1-b068-3846249ad446_large/bartender-preparing-cocktail-stockcake.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+.admin-bg {
+    background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('https://images.stockcake.com/public/4/c/6/4c636216-6c63-4bc8-98f3-1e1ddfd03026_large/elegant-bartender-serving-stockcake.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+.btn-primary {
+    background-color: #1a3b1a;
+    border-color: #1a3b1a;
+}
+
+.btn-primary:hover {
+    background-color: #0f2b0f;
+    border-color: #0f2b0f;
+}
+
+.text-gold {
+    color: #d4af37;
+}
+
+.bg-dark-green {
+    background-color: #1a3b1a;
+}
+
+.bg-darker-green {
+    background-color: #0f2b0f;
+}
+
+.glass-panel {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.nav-tab {
+    transition: all 0.3s ease;
+}
+
+.nav-tab:hover {
+    background-color: rgba(26, 59, 26, 0.8);
+}
+
+.nav-tab.active {
+    background-color: #1a3b1a;
+    border-bottom: 3px solid #d4af37;
+}
+
+.inventory-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.inventory-item {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+}
+
+.inventory-item:hover {
+    background: rgba(0, 0, 0, 0.8);
+    border-color: #1a3b1a;
+}
+
+.recording {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.wine-category {
+    background: rgba(0, 0, 0, 0.7);
+    border-left: 4px solid #1a3b1a;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border-radius: 0 8px 8px 0;
+}
+
+.wine-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.75rem;
+    margin: 0.5rem 0;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.wine-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #1a3b1a;
+}
+
+.featured-wine {
+    background: linear-gradient(135deg, rgba(26, 59, 26, 0.3), rgba(212, 175, 55, 0.1));
+    border: 2px solid #1a3b1a;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+}
+
+.special-card {
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.special-card:hover {
+    background: rgba(0, 0, 0, 0.9);
+    border-color: #1a3b1a;
+}
+
+.alert-86 {
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.2), rgba(0, 0, 0, 0.8));
+    border: 2px solid #dc2626;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.food-special-card {
+    background: linear-gradient(135deg, rgba(26, 59, 26, 0.3), rgba(0, 0, 0, 0.8));
+    border: 2px solid #1a3b1a;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+    .inventory-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    h1 {
+        font-size: 1.5rem !important;
+    }
+    
+    h2 {
+        font-size: 1.25rem !important;
+    }
+    
+    .nav-tab {
+        padding: 0.5rem !important;
+        font-size: 0.8rem !important;
+    }
+    
+    .glass-panel {
+        padding: 1rem !important;
+    }
+    
+    .inventory-item, .wine-item {
+        padding: 0.5rem !important;
+    }
+    
+    .featured-wine, .special-card {
+        padding: 1rem !important;
+    }
+}
+
+/* Animation styles */
+@keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+.animate-fade-in-up {
+    animation: fade-in-up 0.3s ease-out forwards;
+}
+
+.animate-fade-out {
+    animation: fade-out 0.5s ease-out forwards;
+} 

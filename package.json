@@ -1,0 +1,39 @@
+{
+  "name": "table1837-bar-management",
+  "version": "1.0.0",
+  "description": "Bar Management System for Table 1837 at Glen Rock Mill Inn",
+  "main": "index.html",
+  "scripts": {
+    "dev": "live-server --port=3000 --open=/",
+    "build": "npm run build:css && npm run build:js",
+    "build:css": "postcss src/css/main.css -o dist/css/main.css",
+    "build:js": "webpack --mode=production",
+    "build:dev": "webpack --mode=development",
+    "test": "jest",
+    "lint": "eslint src/js/**/*.js",
+    "format": "prettier --write src/**/*.{js,css,html}"
+  },
+  "dependencies": {
+    "tesseract.js": "^4.1.1",
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.23.0",
+    "babel-loader": "^9.1.0",
+    "css-loader": "^6.8.0",
+    "eslint": "^8.50.0",
+    "jest": "^29.7.0",
+    "live-server": "^1.2.2",
+    "postcss": "^8.4.31",
+    "postcss-cli": "^10.1.0",
+    "postcss-preset-env": "^9.1.0",
+    "prettier": "^3.0.3",
+    "style-loader": "^3.3.3",
+    "webpack": "^5.88.0",
+    "webpack-cli": "^5.1.0"
+  },
+  "keywords": ["bar-management", "inventory", "restaurant", "table1837"],
+  "author": "John Patrick",
+  "license": "PROPRIETARY"
+} 

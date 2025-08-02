@@ -4,7 +4,7 @@ export class InventoryModule {
         this.state = app.state;
         this.elements = app.elements;
         
-        // Inventory data - exactly as in original
+        // Complete Table 1837 Inventory - Updated with Master J's Collection
         this.inventory = {
             vodka: [
                 'Zyr Vodka', '360 Double Chocolate Vodka', 'Western Sun Blueberry Vodka',
@@ -46,6 +46,29 @@ export class InventoryModule {
                 'Middle West Spirits Bourbon Cream', 'Disaronno Amaretto', 'Screwball',
                 'Kahlua', 'Bailey\'s', 'RumChata', 'Frangelico', 'Sambuca', 'Luxardo',
                 'Campari', 'Aperol', 'Cream to Violet', 'Contreau', 'Pama Pomegranate Liqueur'
+            ],
+            juices: [
+                'Orange Juice', 'Cranberry Juice', 'Lime Juice', 'Lemon Juice', 
+                'Grapefruit Juice', 'Sour Mix'
+            ],
+            sodas: [
+                'Sprite', 'Coke', 'Diet Coke', 'Ginger Beer'
+            ],
+            teas: [
+                'Raspberry Tea', 'Hibiscus Tea', 'Tea'
+            ],
+            fruits: [
+                'Oranges', 'Limes', 'Lemons', 'Cherries', 'Luxardo Cherries'
+            ],
+            garnishes: [
+                'Olives', 'Blue Cheese Stuffed Olives'
+            ],
+            salts: [
+                'Smoked Salt', 'Salt', 'Sugar'
+            ],
+            bitters: [
+                'Angostura Bitters', 'Peychaud\'s Bitters', 'Orange Bitters',
+                'Lavender Orange Bitters', 'Black Walnut Bitters'
             ]
         };
     }

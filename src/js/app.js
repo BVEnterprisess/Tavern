@@ -1,5 +1,8 @@
 
-import { AuthService } from './services/authService.js';
+import { SecureAuthService } from './services/secureAuthService.js';
+import { DataPersistenceService } from './services/dataPersistenceService.js';
+import { ErrorHandler } from './services/errorHandler.js';
+import { ValidationService } from './services/validationService.js';
 import { PerformanceService } from './services/performanceService.js';
 import { PerformanceMonitor } from './services/performanceMonitor.js';
 import { SearchService } from './services/searchService.js';
@@ -13,23 +16,29 @@ import { PerformanceModule } from './modules/performance.js';
 
 export class Table1837App {
     constructor() {
+        // Initialize core services first
+        this.services = {};
+        this.initializeCoreServices();
+        
+        // Initialize state with secure data persistence
         this.state = {
-            items86: JSON.parse(localStorage.getItem('items86') || '[]'),
-            inventoryData: JSON.parse(localStorage.getItem('inventoryData') || '{}'),
-            ocrData: {
+            items86: this.services.dataPersistence.loadData('items86', []),
+            inventoryData: this.services.dataPersistence.loadData('inventoryData', {}),
+            ocrData: this.services.dataPersistence.loadData('ocrData', {
                 redWine: null,
                 whiteWine: null,
                 starters: [],
                 entrees: [],
                 cocktail: null
-            },
+            }),
             recognition: null,
-            isListening: false
+            isListening: false,
+            user: null,
+            session: null
         };
         
         this.elements = {};
         this.modules = {};
-        this.services = {};
         
         // Initialize enhanced services
         this.initializeServices();
@@ -191,6 +200,16 @@ export class Table1837App {
         });
     }
     
+    initializeCoreServices() {
+        // Initialize core services first
+        this.services.errorHandler = new ErrorHandler();
+        this.services.dataPersistence = new DataPersistenceService();
+        this.services.validation = new ValidationService();
+        this.services.auth = new SecureAuthService();
+        
+        console.log('🔧 Core services initialized');
+    }
+    
     initializeServices() {
         // Initialize enhanced services
         this.services.performance = new PerformanceService();
@@ -259,14 +278,36 @@ export class Table1837App {
         }
     }
 
-    handleLogin() {
-        const username = document.getElementById('username').value.toLowerCase();
-        const password = document.getElementById('password').value;
-        
-        if (AuthService.authenticate(username, password)) {
-            this.showMainApp();
-        } else {
-            alert('Invalid credentials. Please try again.');
+    async handleLogin() {
+        try {
+            const username = document.getElementById('username').value.toLowerCase();
+            const password = document.getElementById('password').value;
+            
+            // Validate input
+            const validation = this.services.validation.validateForm({
+                username: username,
+                password: password
+            });
+            
+            if (!validation.isValid) {
+                this.showError('Please check your input: ' + Object.values(validation.errors).join(', '));
+                return;
+            }
+            
+            // Authenticate with secure service
+            const result = await this.services.auth.authenticate(username, password);
+            
+            if (result.success) {
+                this.state.user = result.user;
+                this.state.session = result.session;
+                this.showMainApp();
+                this.showSuccess('Login successful!');
+            } else {
+                this.showError('Invalid credentials. Please try again.');
+            }
+        } catch (error) {
+            this.services.errorHandler.handleError(error, 'login');
+            this.showError('Login failed. Please try again.');
         }
     }
 
@@ -335,8 +376,18 @@ export class Table1837App {
     }
 
     saveState() {
-        localStorage.setItem('items86', JSON.stringify(this.state.items86));
-        localStorage.setItem('inventoryData', JSON.stringify(this.state.inventoryData));
+        // Use secure data persistence
+        this.services.dataPersistence.saveData('items86', this.state.items86);
+        this.services.dataPersistence.saveData('inventoryData', this.state.inventoryData);
+        this.services.dataPersistence.saveData('ocrData', this.state.ocrData);
+    }
+    
+    showError(message) {
+        this.showToast(message, 'error');
+    }
+    
+    showSuccess(message) {
+        this.showToast(message, 'success');
     }
 
     showToast(message, type = 'info') {

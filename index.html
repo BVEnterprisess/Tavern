@@ -3,526 +3,1511 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Table 1837 - Bar Management System</title>
+    <title>My Bar - Cocktail Recipe App</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="dist/css/main.css">
+    <style>
+        .cocktail-card {
+            transition: transform 0.2s ease-in-out;
+        }
+        .cocktail-card:hover {
+            transform: translateY(-4px);
+        }
+        .ingredient-tag {
+            transition: all 0.2s ease-in-out;
+        }
+        .ingredient-tag.selected {
+            transform: scale(1.05);
+        }
+        .glass-pattern {
+            background-image: radial-gradient(circle at 20% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                            radial-gradient(circle at 80% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%);
+        }
+        .scroll-container {
+            scrollbar-width: thin;
+            scrollbar-color: #D4AF37 #2C2C2C;
+        }
+        .scroll-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        .scroll-container::-webkit-scrollbar-track {
+            background: #2C2C2C;
+        }
+        .scroll-container::-webkit-scrollbar-thumb {
+            background-color: #D4AF37;
+            border-radius: 3px;
+        }
+    </style>
 </head>
-<body class="bg-black text-white min-h-screen">
-    <!-- Login Page -->
-    <div id="loginPage" class="login-bg min-h-screen flex items-center justify-center">
-        <div class="glass-panel p-8 rounded-lg w-full max-w-md mx-4">
-            <div class="text-center mb-8">
-                <h1 class="text-4xl font-bold mb-2">TABLE 1837</h1>
-                <p class="text-gray-300 text-lg">Glen Rock Mill Inn</p>
-                <p class="text-gray-400">Bar Management System</p>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Header -->
+    <header class="bg-gray-800 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-cocktail text-yellow-400 text-2xl"></i>
+                    <h1 class="text-2xl font-bold text-yellow-400">My Bar</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="searchBtn" class="p-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <button id="settingsBtn" class="p-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
             </div>
-            
-            <form id="loginForm" class="space-y-6">
-                <div>
-                    <label class="block text-sm font-medium mb-2">Username</label>
-                    <input type="email" id="username" class="w-full px-4 py-3 bg-black bg-opacity-50 border border-gray-600 rounded-lg focus:outline-none focus:border-green-600 text-white" placeholder="Enter your email" required>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium mb-2">Password</label>
-                    <input type="password" id="password" class="w-full px-4 py-3 bg-black bg-opacity-50 border border-gray-600 rounded-lg focus:outline-none focus:border-green-600 text-white" placeholder="Enter your password" required>
-                </div>
-                
-                <button type="submit" class="w-full btn-primary text-white py-3 px-6 rounded-lg font-semibold text-lg hover:bg-opacity-80 transition duration-300">
-                    ACCESS INVENTORY SYSTEM
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="bg-gray-800 border-b border-gray-700">
+        <div class="container mx-auto px-4">
+            <div class="flex space-x-1 overflow-x-auto">
+                <button class="nav-tab active px-4 py-3 text-sm font-medium rounded-t-lg whitespace-nowrap" data-tab="browse">
+                    <i class="fas fa-list mr-2"></i>Browse All
                 </button>
-                
-                <div class="text-center text-sm text-gray-400">
-                    <p>Demo Credentials:</p>
-                    <p>user@table1837.com / password123</p>
+                <button class="nav-tab px-4 py-3 text-sm font-medium rounded-t-lg whitespace-nowrap" data-tab="mybar">
+                    <i class="fas fa-wine-bottle mr-2"></i>My Bar (<span id="barCount">0</span>)
+                </button>
+                <button class="nav-tab px-4 py-3 text-sm font-medium rounded-t-lg whitespace-nowrap" data-tab="mycocktails">
+                    <i class="fas fa-cocktail mr-2"></i>My Cocktails
+                </button>
+                <button class="nav-tab px-4 py-3 text-sm font-medium rounded-t-lg whitespace-nowrap" data-tab="favorites">
+                    <i class="fas fa-heart mr-2"></i>Favorites
+                </button>
+                <button class="nav-tab px-4 py-3 text-sm font-medium rounded-t-lg whitespace-nowrap" data-tab="custom">
+                    <i class="fas fa-plus-circle mr-2"></i>Custom
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+        <!-- Search Bar -->
+        <div id="searchBar" class="hidden mb-6">
+            <div class="relative">
+                <input type="text" id="searchInput" placeholder="Search cocktails or ingredients..." 
+                       class="w-full px-4 py-3 pl-12 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent">
+                <i class="fas fa-search absolute left-4 top-4 text-gray-400"></i>
+            </div>
+        </div>
+
+        <!-- Browse All Tab -->
+        <div id="browseTab" class="tab-content">
+            <div class="flex flex-wrap gap-4 mb-6">
+                <select id="categoryFilter" class="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg">
+                    <option value="">All Categories</option>
+                </select>
+                <select id="glassFilter" class="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg">
+                    <option value="">All Glasses</option>
+                </select>
+                <select id="alcoholicFilter" class="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg">
+                    <option value="">All Types</option>
+                    <option value="Alcoholic">Alcoholic</option>
+                    <option value="Non alcoholic">Non-Alcoholic</option>
+                </select>
+            </div>
+            <div id="allCocktails" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+            <div id="loadingBrowse" class="text-center py-8">
+                <i class="fas fa-spinner fa-spin text-3xl text-yellow-400"></i>
+                <p class="mt-2">Loading cocktails...</p>
+            </div>
+        </div>
+
+        <!-- My Bar Tab -->
+        <div id="mybarTab" class="tab-content hidden">
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold">My Ingredients</h2>
+                    <button id="addIngredientBtn" class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg font-medium">
+                        <i class="fas fa-plus mr-2"></i>Add Ingredient
+                    </button>
                 </div>
-            </form>
+                <div id="ingredientCategories" class="space-y-4">
+                    <div class="bg-gray-800 rounded-lg p-4">
+                        <h3 class="font-semibold mb-3 text-yellow-400">Spirits (<span id="spiritsCount">0</span>)</h3>
+                        <div id="spiritsContainer" class="flex flex-wrap gap-2"></div>
+                    </div>
+                    <div class="bg-gray-800 rounded-lg p-4">
+                        <h3 class="font-semibold mb-3 text-yellow-400">Liqueurs (<span id="liqueursCount">0</span>)</h3>
+                        <div id="liqueursContainer" class="flex flex-wrap gap-2"></div>
+                    </div>
+                    <div class="bg-gray-800 rounded-lg p-4">
+                        <h3 class="font-semibold mb-3 text-yellow-400">Mixers (<span id="mixersCount">0</span>)</h3>
+                        <div id="mixersContainer" class="flex flex-wrap gap-2"></div>
+                    </div>
+                    <div class="bg-gray-800 rounded-lg p-4">
+                        <h3 class="font-semibold mb-3 text-yellow-400">Others (<span id="othersCount">0</span>)</h3>
+                        <div id="othersContainer" class="flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Cocktails Tab -->
+        <div id="mycocktailsTab" class="tab-content hidden">
+            <div class="mb-6">
+                <div class="bg-green-900 bg-opacity-30 border border-green-700 rounded-lg p-4 mb-6">
+                    <h3 class="text-lg font-semibold mb-2 text-green-400">
+                        <i class="fas fa-check-circle mr-2"></i>You Can Make (<span id="canMakeCount">0</span>)
+                    </h3>
+                    <div id="canMakeCocktails" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </div>
+                
+                <div class="bg-yellow-900 bg-opacity-30 border border-yellow-700 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold mb-2 text-yellow-400">
+                        <i class="fas fa-exclamation-circle mr-2"></i>Almost Can Make (<span id="almostCanMakeCount">0</span>)
+                    </h3>
+                    <div id="almostCanMakeCocktails" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Favorites Tab -->
+        <div id="favoritesTab" class="tab-content hidden">
+            <div class="mb-6">
+                <h2 class="text-xl font-bold mb-4">Your Favorite Cocktails</h2>
+                <div id="favoriteCocktails" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+                <div id="noFavorites" class="text-center py-12 text-gray-400">
+                    <i class="fas fa-heart text-6xl mb-4"></i>
+                    <p class="text-lg">No favorite cocktails yet</p>
+                    <p class="text-sm">Browse cocktails and click the heart to add them here!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Tab -->
+        <div id="customTab" class="tab-content hidden">
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold">Custom Cocktails</h2>
+                    <button id="createCustomBtn" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg font-medium">
+                        <i class="fas fa-plus mr-2"></i>Create Custom
+                    </button>
+                </div>
+                <div id="customCocktails" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+                <div id="noCustom" class="text-center py-12 text-gray-400">
+                    <i class="fas fa-flask text-6xl mb-4"></i>
+                    <p class="text-lg">No custom cocktails yet</p>
+                    <p class="text-sm">Create your own unique cocktail recipes!</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Cocktail Detail Modal -->
+    <div id="cocktailModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-gray-800 rounded-lg max-w-2xl w-full max-h-full overflow-y-auto scroll-container">
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <h2 id="modalTitle" class="text-2xl font-bold"></h2>
+                    <button id="closeModal" class="text-gray-400 hover:text-white text-2xl">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div id="modalContent"></div>
+            </div>
         </div>
     </div>
 
-    <!-- Main Application -->
-    <div id="mainApp" class="hidden min-h-screen">
-        <!-- Header with Navigation -->
-        <header class="bg-black bg-opacity-90 backdrop-filter backdrop-blur-sm border-b border-gray-800 sticky top-0 z-50">
-            <div class="container mx-auto px-4">
-                <div class="flex items-center justify-between py-4">
-                    <div class="text-center">
-                        <h1 class="text-2xl font-bold">TABLE 1837</h1>
-                        <p class="text-sm text-gray-400">Bar Management</p>
-                    </div>
+    <!-- Ingredient Selector Modal -->
+    <div id="ingredientModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-gray-800 rounded-lg max-w-4xl w-full max-h-full overflow-y-auto scroll-container">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold">Add Ingredients</h2>
+                    <button id="closeIngredientModal" class="text-gray-400 hover:text-white text-2xl">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
-                
-                <!-- Navigation Tabs -->
-                <nav class="flex space-x-1 mt-4 overflow-x-auto">
-                    <button class="nav-tab px-4 py-2 rounded-t-lg text-sm font-medium active" data-tab="dashboard">
-                        Dashboard
-                    </button>
-                    <button class="nav-tab px-4 py-2 rounded-t-lg text-sm font-medium" data-tab="staff">
-                        Staff
-                    </button>
-                    <button class="nav-tab px-4 py-2 rounded-t-lg text-sm font-medium" data-tab="admin">
-                        Admin
-                    </button>
-                    <button class="nav-tab px-4 py-2 rounded-t-lg text-sm font-medium" data-tab="wine">
-                        Wine
-                    </button>
-                    <button class="nav-tab px-4 py-2 rounded-t-lg text-sm font-medium" data-tab="inventory">
-                        Inventory
-                    </button>
-                    <button class="nav-tab px-4 py-2 rounded-t-lg text-sm font-medium ml-auto" onclick="logout()">
-                        Logout
-                    </button>
-                </nav>
-            </div>
-        </header>
-
-        <!-- Dashboard Tab -->
-        <div id="dashboard-content" class="tab-content dashboard-bg min-h-screen p-6">
-            <div class="container mx-auto max-w-6xl">
-                <h2 class="text-3xl font-bold mb-8 text-center">Daily Dashboard</h2>
-                
-                <!-- Featured Wines of the Week -->
-                <div class="grid md:grid-cols-2 gap-6 mb-8">
-                    <div class="featured-wine">
-                        <h3 class="text-xl font-bold mb-3 flex items-center">
-                            <i class="fas fa-wine-glass-alt mr-2 text-yellow-400"></i>
-                            Featured Red Wine
-                        </h3>
-                        <p class="text-lg font-semibold">CRISTOM, EILEEN VYD., PINOT NOIR</p>
-                        <p class="text-gray-300">Eola-Amity Hills, Willamette Valley, OR, 2019</p>
-                        <p class="text-2xl font-bold text-yellow-400 mt-2">$185</p>
-                        <p class="text-sm text-gray-400">(R013)</p>
-                    </div>
-                    
-                    <div class="featured-wine">
-                        <h3 class="text-xl font-bold mb-3 flex items-center">
-                            <i class="fas fa-wine-glass-alt mr-2 text-yellow-400"></i>
-                            Featured White Wine
-                        </h3>
-                        <p class="text-lg font-semibold">NEYERS, CARNEROS CHARDONNAY</p>
-                        <p class="text-gray-300">Sonoma County, CA, 2019</p>
-                        <p class="text-2xl font-bold text-yellow-400 mt-2">$100</p>
-                        <p class="text-sm text-gray-400">(C004)</p>
-                    </div>
+                <div class="mb-4">
+                    <input type="text" id="ingredientSearch" placeholder="Search ingredients..." 
+                           class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg">
                 </div>
-                
-                <!-- 86'd Items Alert -->
-                <div id="alert86Items" class="alert-86 mb-8">
-                    <h3 class="text-xl font-bold mb-3 flex items-center">
-                        <i class="fas fa-exclamation-triangle mr-2"></i>
-                        86'd Items
-                    </h3>
-                    <div id="alert86List">
-                        <p class="text-gray-300">No items currently 86'd</p>
-                    </div>
-                </div>
-                
-                <!-- Food Specials -->
-                <div class="food-special-card mb-8">
-                    <h3 class="text-xl font-bold mb-3 flex items-center">
-                        <i class="fas fa-utensils mr-2 text-yellow-400"></i>
-                        Food Specials
-                    </h3>
-                    <div class="grid md:grid-cols-3 gap-4">
-                        <div>
-                            <h4 class="font-bold text-yellow-400">Hors d'oeuvre</h4>
-                            <p class="text-gray-300">Salmon Tartare with Avocado Mousse</p>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-yellow-400">Intermezzo</h4>
-                            <p class="text-gray-300">Lemon Basil Sorbet</p>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-yellow-400">Soup of the Day</h4>
-                            <p class="text-gray-300">Wild Mushroom Bisque</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Today's Special -->
-                <div class="special-card">
-                    <h3 class="text-2xl font-bold mb-4 flex items-center">
-                        <i class="fas fa-glass-martini mr-2 text-yellow-400"></i>
-                        Happy Hour Special
-                    </h3>
-                    <div id="todaySpecial"></div>
-                </div>
+                <div id="ingredientList" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2"></div>
             </div>
         </div>
+    </div>
 
-        <!-- Staff Tab -->
-        <div id="staff-content" class="tab-content staff-bg min-h-screen p-6 hidden">
-            <div class="container mx-auto max-w-4xl">
-                <h2 class="text-3xl font-bold mb-8 text-center">Staff Communication</h2>
-                
-                <!-- Add 86'd Items -->
-                <div class="glass-panel p-6 rounded-lg mb-8">
-                    <h3 class="text-xl font-bold mb-4">Add 86'd Item</h3>
-                    <div class="flex gap-4">
-                        <input type="text" id="item86Input" class="flex-1 px-4 py-2 bg-black bg-opacity-50 border border-gray-600 rounded-lg focus:outline-none focus:border-green-600 text-white" placeholder="Enter item name">
-                        <button onclick="add86Item()" class="btn-primary px-6 py-2 rounded-lg font-semibold">
-                            Add to 86'd List
+    <!-- Custom Cocktail Modal -->
+    <div id="customModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-gray-800 rounded-lg max-w-2xl w-full max-h-full overflow-y-auto scroll-container">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold">Create Custom Cocktail</h2>
+                    <button id="closeCustomModal" class="text-gray-400 hover:text-white text-2xl">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="customCocktailForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Cocktail Name</label>
+                        <input type="text" id="customName" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Instructions</label>
+                        <textarea id="customInstructions" rows="4" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Ingredients</label>
+                        <div id="customIngredients" class="space-y-2"></div>
+                        <button type="button" id="addCustomIngredient" class="mt-2 px-3 py-1 bg-yellow-600 hover:bg-yellow-700 rounded text-sm">
+                            <i class="fas fa-plus mr-1"></i>Add Ingredient
                         </button>
                     </div>
-                </div>
-                
-                <!-- Current 86'd Items -->
-                <div class="glass-panel p-6 rounded-lg mb-8">
-                    <h3 class="text-xl font-bold mb-4">Current 86'd Items</h3>
-                    <div id="current86Items" class="space-y-2"></div>
-                </div>
-                
-                <!-- Staff Contacts -->
-                <div class="glass-panel p-6 rounded-lg">
-                    <h3 class="text-xl font-bold mb-6">Staff Contacts</h3>
-                    <div class="grid md:grid-cols-3 gap-6">
-                        <div class="text-center p-4 bg-black bg-opacity-30 rounded-lg">
-                            <i class="fas fa-user-tie text-3xl mb-3 text-yellow-400"></i>
-                            <h4 class="font-bold text-lg">Bar Manager</h4>
-                            <p class="text-lg">Jason</p>
-                            <a href="tel:7176594430" class="text-green-400 hover:text-green-300 text-lg">
-                                (717) 659-4430
-                            </a>
-                        </div>
-                        
-                        <div class="text-center p-4 bg-black bg-opacity-30 rounded-lg">
-                            <i class="fas fa-cocktail text-3xl mb-3 text-yellow-400"></i>
-                            <h4 class="font-bold text-lg">Bartender</h4>
-                            <p class="text-lg">John</p>
-                            <a href="tel:7178588338" class="text-green-400 hover:text-green-300 text-lg">
-                                (717) 858-8338
-                            </a>
-                        </div>
-                        
-                        <div class="text-center p-4 bg-black bg-opacity-30 rounded-lg">
-                            <i class="fas fa-wine-glass text-3xl mb-3 text-yellow-400"></i>
-                            <h4 class="font-bold text-lg">Bartender</h4>
-                            <p class="text-lg">Ivana</p>
-                            <a href="tel:7174954252" class="text-green-400 hover:text-green-300 text-lg">
-                                (717) 495-4252
-                            </a>
-                        </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" id="cancelCustom" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg">Create Cocktail</button>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
+    </div>
 
-        <!-- Admin Tab -->
-        <div id="admin-content" class="tab-content admin-bg min-h-screen p-6 hidden">
-            <div class="container mx-auto max-w-2xl">
-                <h2 class="text-3xl font-bold mb-8 text-center">Admin Contact</h2>
-                
-                <!-- Admin Contact Info -->
-                <div class="glass-panel p-6 rounded-lg mb-8">
-                    <div class="text-center p-6">
-                        <i class="fas fa-wine-bottle text-5xl mb-4 text-yellow-400"></i>
-                        <h3 class="text-2xl font-bold mb-2">Wine Steward / Maître d'hôtel</h3>
-                        <p class="text-xl mb-4">Graeson</p>
-                        <a href="tel:7176836763" class="text-green-400 hover:text-green-300 text-xl">
-                            (717) 683-6763
-                        </a>
-                    </div>
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-gray-800 rounded-lg max-w-2xl w-full max-h-full overflow-y-auto scroll-container">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold">Settings</h2>
+                    <button id="closeSettingsModal" class="text-gray-400 hover:text-white text-2xl">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
                 
-                <!-- OCR Upload Tool -->
-                <div class="glass-panel p-6 rounded-lg mb-8">
-                    <h3 class="text-xl font-bold mb-4">Fresh Features OCR Tool</h3>
-                    <p class="text-gray-300 mb-4">Upload a photo of the Fresh Features paper to automatically extract information and update the dashboard.</p>
-                    
-                    <!-- Ultra-Enhanced OCR Test Link -->
-                    <div class="mb-4 p-4 bg-yellow-400 bg-opacity-20 border border-yellow-400 rounded-lg">
-                        <h4 class="font-bold text-yellow-400 mb-2">🚀 Ultra-Enhanced OCR Test</h4>
-                        <p class="text-sm text-gray-300 mb-3">Test the new 97%+ accuracy OCR system with advanced AI processing</p>
-                        <a href="test-ultra-ocr.html" target="_blank" class="inline-flex items-center px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold rounded-lg transition-colors">
-                            <i class="fas fa-rocket mr-2"></i>Launch Ultra-Enhanced OCR Test
-                        </a>
-                    </div>
-                    
-                    <div class="mb-6">
-                        <div class="flex items-center justify-center w-full">
-                            <label for="ocrFileUpload" class="flex flex-col w-full h-32 border-2 border-gray-600 border-dashed rounded-lg cursor-pointer bg-black bg-opacity-50 hover:bg-opacity-70">
-                                <div class="flex flex-col items-center justify-center pt-7">
-                                    <i class="fas fa-cloud-upload-alt text-2xl text-yellow-400"></i>
-                                    <p class="pt-1 text-sm tracking-wider text-gray-300">Upload image or take photo</p>
-                                </div>
-                                <input id="ocrFileUpload" type="file" class="hidden" accept="image/*" capture="environment" />
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div id="ocrPreviewContainer" class="hidden mb-6">
-                        <h4 class="font-bold mb-2">Image Preview:</h4>
-                        <div class="flex justify-center">
-                            <img id="ocrPreview" class="max-h-60 rounded-lg" alt="Upload preview">
-                        </div>
-                        <button id="processOcrButton" class="w-full btn-primary py-3 px-6 rounded-lg font-semibold mt-4">
-                            <i class="fas fa-magic mr-2"></i> Process Image
-                        </button>
-                    </div>
-                    
-                    <div id="ocrResultContainer" class="hidden">
-                        <h4 class="font-bold mb-2">Extracted Information:</h4>
-                        <div id="ocrResult" class="bg-black bg-opacity-60 p-4 rounded-lg text-sm max-h-60 overflow-y-auto"></div>
-                        <div class="flex justify-end mt-4">
-                            <button id="applyOcrButton" class="btn-primary py-2 px-4 rounded-lg font-semibold">
-                                <i class="fas fa-check mr-2"></i> Apply Changes
+                <div class="space-y-6">
+                    <!-- Theme Settings -->
+                    <div>
+                        <h3 class="text-lg font-semibold mb-3 text-yellow-400">Theme</h3>
+                        <div class="grid grid-cols-3 gap-3">
+                            <button class="theme-btn p-3 rounded-lg border-2 border-transparent hover:border-yellow-400" data-theme="dark">
+                                <div class="w-full h-8 bg-gray-900 rounded mb-2"></div>
+                                <span class="text-sm">Dark</span>
+                            </button>
+                            <button class="theme-btn p-3 rounded-lg border-2 border-transparent hover:border-yellow-400" data-theme="light">
+                                <div class="w-full h-8 bg-gray-100 rounded mb-2"></div>
+                                <span class="text-sm">Light</span>
+                            </button>
+                            <button class="theme-btn p-3 rounded-lg border-2 border-transparent hover:border-yellow-400" data-theme="auto">
+                                <div class="w-full h-8 bg-gradient-to-r from-gray-900 to-gray-100 rounded mb-2"></div>
+                                <span class="text-sm">Auto</span>
                             </button>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Message Form -->
-                <div class="glass-panel p-6 rounded-lg">
-                    <h3 class="text-xl font-bold mb-4">Send Message to Management</h3>
-                    <form id="adminMessageForm">
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium mb-2">Your Name</label>
-                            <input type="text" id="senderName" class="w-full px-4 py-2 bg-black bg-opacity-50 border border-gray-600 rounded-lg focus:outline-none focus:border-green-600 text-white" required>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium mb-2">Subject</label>
-                            <input type="text" id="messageSubject" class="w-full px-4 py-2 bg-black bg-opacity-50 border border-gray-600 rounded-lg focus:outline-none focus:border-green-600 text-white" required>
-                        </div>
-                        
-                        <div class="mb-6">
-                            <label class="block text-sm font-medium mb-2">Message</label>
-                            <textarea id="messageBody" rows="6" class="w-full px-4 py-2 bg-black bg-opacity-50 border border-gray-600 rounded-lg focus:outline-none focus:border-green-600 text-white" required></textarea>
-                        </div>
-                        
-                        <button type="submit" class="w-full btn-primary py-3 px-6 rounded-lg font-semibold">
-                            Send Message
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
 
-        <!-- Wine Tab -->
-        <div id="wine-content" class="tab-content wine-bg min-h-screen p-6 hidden">
-            <div class="container mx-auto max-w-6xl">
-                <h2 class="text-3xl font-bold mb-8 text-center">Wine Collection</h2>
-                
-                <!-- Search and Filter -->
-                <div class="glass-panel p-4 rounded-lg mb-8">
-                    <div class="flex flex-wrap gap-4">
-                        <input type="text" id="wineSearch" class="flex-1 px-4 py-2 bg-black bg-opacity-50 border border-gray-600 rounded-lg focus:outline-none focus:border-green-600 text-white" placeholder="Search wines...">
-                        <select id="wineFilter" class="px-4 py-2 bg-black bg-opacity-50 border border-gray-600 rounded-lg focus:outline-none focus:border-green-600 text-white">
-                            <option value="">All Categories</option>
-                            <option value="red">Red Wines</option>
-                            <option value="white">White Wines</option>
-                            <option value="sparkling">Sparkling & Champagne</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <!-- Wine Categories -->
-                <div id="wineCategories">
-                    <!-- Red Wines -->
-                    <div class="wine-category red-wine">
-                        <h3 class="text-2xl font-bold mb-4 text-red-400">PINOT NOIR</h3>
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div class="wine-item">
-                                <p class="font-semibold">CRISTOM, EILEEN VY.D., EOLA-AMITY HILLS</p>
-                                <p class="text-sm text-gray-300">Willamette Valley, OR, 2019</p>
-                                <p class="text-lg font-bold text-yellow-400">$185 <span class="text-sm">(R013)</span></p>
-                            </div>
-                            <div class="wine-item">
-                                <p class="font-semibold">CRISTOM, JESSIE VYD., EOLA-AMITY HILLS</p>
-                                <p class="text-sm text-gray-300">Willamette Valley, OR, 2020</p>
-                                <p class="text-lg font-bold text-yellow-400">$199 <span class="text-sm">(R059)</span></p>
-                            </div>
-                            <div class="wine-item">
-                                <p class="font-semibold">ENROUTE, LES PONNIERS VYD.</p>
-                                <p class="text-sm text-gray-300">Russian River Valley, CA, 2020</p>
-                                <p class="text-lg font-bold text-yellow-400">$105 <span class="text-sm">(R042)</span></p>
-                            </div>
-                            <div class="wine-item">
-                                <p class="font-semibold">BRAVIUM</p>
-                                <p class="text-sm text-gray-300">Alexander Valley, CA, 2021</p>
-                                <p class="text-lg font-bold text-yellow-400">$95 <span class="text-sm">(R024)</span></p>
-                            </div>
-                            <div class="wine-item">
-                                <p class="font-semibold">CLOS DE LA TECH</p>
-                                <p class="text-sm text-gray-300">Santa Cruz Mountain Estates, CA, 2017</p>
-                                <p class="text-lg font-bold text-yellow-400">$66 <span class="text-sm">(R042)</span></p>
-                            </div>
+                    <!-- Display Settings -->
+                    <div>
+                        <h3 class="text-lg font-semibold mb-3 text-yellow-400">Display</h3>
+                        <div class="space-y-3">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="showImages" class="mr-3" checked>
+                                <span>Show cocktail images</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="showAnimations" class="mr-3" checked>
+                                <span>Enable animations</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="compactMode" class="mr-3">
+                                <span>Compact mode</span>
+                            </label>
                         </div>
                     </div>
-                    
-                    <div class="wine-category red-wine">
-                        <h3 class="text-2xl font-bold mb-4 text-red-400">MERLOT</h3>
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div class="wine-item">
-                                <p class="font-semibold">RUTHERFORD FAMILY WINERY</p>
-                                <p class="text-sm text-gray-300">Monterey, CA, 2019</p>
-                                <p class="text-lg font-bold text-yellow-400">$90 <span class="text-sm">(R012)</span></p>
-                            </div>
-                            <div class="wine-item">
-                                <p class="font-semibold">SUBSTANCE, VYD. COLLECTION</p>
-                                <p class="text-sm text-gray-300">Stoneridge Vyd., WA, 2018</p>
-                                <p class="text-lg font-bold text-yellow-400">$80 <span class="text-sm">(R009)</span></p>
-                            </div>
-                            <div class="wine-item">
-                                <p class="font-semibold">POST & BEAM</p>
-                                <p class="text-sm text-gray-300">Napa Valley, 2019</p>
-                                <p class="text-lg font-bold text-yellow-400">$150 <span class="text-sm">(R021)</span></p>
-                            </div>
-                            <div class="wine-item">
-                                <p class="font-semibold">RODALE, COTARELLA</p>
-                                <p class="text-sm text-gray-300">Lazio, IGT, Italy, 2019</p>
-                                <p class="text-lg font-bold text-yellow-400">$70 <span class="text-sm">(R005)</span></p>
-                            </div>
-                            <div class="wine-item">
-                                <p class="font-semibold">CLINE FAMILY CELLARS</p>
-                                <p class="text-sm text-gray-300">Seven Ranchlands, Sonoma County, CA, 2020</p>
-                                <p class="text-lg font-bold text-yellow-400">$72 <span class="text-sm">(R054)</span></p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="wine-category red-wine">
-                        <h3 class="text-2xl font-bold mb-4 text-red-400">CABERNET SAUVIGNON</h3>
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div class="wine-item">
-                                <p class="font-semibold">NEYERS</p>
-                                <p class="text-sm text-gray-300">Napa Valley, 2018</p>
-                                <p class="text-lg font-bold text-yellow-400">$165 <span class="text-sm">(R071)</span></p>
-                            </div>
-                            <div class="wine-item">
-                                <p class="font-semibold">PENFOLDS BIN 407</p>
-                                <p class="text-sm text-gray-300">South Australia, 2019</p>
-                                <p class="text-lg font-bold text-yellow-400">$145 <span class="text-sm">(R011)</span></p>
-                            </div>
-                            <div class="wine-item">
-                                <p class="font-semibold">SHAFER CELLARS, FOUR PLACES</p>
-                                <p class="text-sm text-gray-300">Red Mountain AVA, Washington, 2019</p>
-                                <p class="text-lg font-bold text-yellow-400">$124 <span class="text-sm">(R017)</span></p>
-                            </div>
-                            <div class="wine-item">
-                                <p class="font-semibold">CAKEBREAD CELLARS</p>
-                                <p class="text-sm text-gray-300">Napa Valley, 2021</p>
-                                <p class="text-lg font-bold text-yellow-400">$250 <span class="text-sm">(R070)</span></p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- White Wines -->
-                    <div class="wine-category white-wine">
-                        <h3 class="text-2xl font-bold mb-4 text-yellow-400">CHARDONNAY</h3>
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div class="wine-item">
-                                <p class="font-semibold">ALLEGRO STEEL</p>
-                                <p class="text-sm text-gray-300">Brogue, PA, 2016</p>
-                                <p class="text-lg font-bold text-yellow-400">$58 <span class="text-sm">(101A)</span></p>
-                            </div>
-                            <div class="wine-item">
-                                <p class="font-semibold">NEYERS</p>
-                                <p class="text-sm text-gray-300">Carneros District, Sonoma County, CA, 2019</p>
-                                <p class="text-lg font-bold text-yellow-400">$100 <span class="text-sm">(C004)</span></p>
-                            </div>
-                            <div class="wine-item">
-                                <p class="font-semibold">WORKS & DAYS</p>
-                                <p class="text-sm text-gray-300">Sonoma Coast, CA, 2019</p>
-                                <p class="text-lg font-bold text-yellow-400">$102 <span class="text-sm">(C009)</span></p>
-                            </div>
-                            <div class="wine-item">
-                                <p class="font-semibold">CRISTOM</p>
-                                <p class="text-sm text-gray-300">Eola-Amity Hills, Willamette Valley, WA, 2019</p>
-                                <p class="text-lg font-bold text-yellow-400">$95 <span class="text-sm">(404A)</span></p>
-                            </div>
-                            <div class="wine-item">
-                                <p class="font-semibold">CAKEBREAD CELLARS</p>
-                                <p class="text-sm text-gray-300">Napa Valley, 2021</p>
-                                <p class="text-lg font-bold text-yellow-400">$115 <span class="text-sm">(C015)</span></p>
-                            </div>
-                            <div class="wine-item">
-                                <p class="font-semibold">RAMEY</p>
-                                <p class="text-sm text-gray-300">Russian River Valley, CA, 2021</p>
-                                <p class="text-lg font-bold text-yellow-400">$120 <span class="text-sm">(C016)</span></p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Sparkling & Champagne -->
-                    <div class="wine-category sparkling-wine">
-                        <h3 class="text-2xl font-bold mb-4 text-blue-400">CHAMPAGNE</h3>
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div class="wine-item">
-                                <p class="font-semibold">MOET & CHANDON</p>
-                                <p class="text-sm text-gray-300">Imperial, Brut, France, NV</p>
-                                <p class="text-lg font-bold text-yellow-400">$110 <span class="text-sm">(501A)</span></p>
-                            </div>
-                            <div class="wine-item">
-                                <p class="font-semibold">VEUVE CLICQUOT</p>
-                                <p class="text-sm text-gray-300">Yellow Label, Brut, France NV</p>
-                                <p class="text-lg font-bold text-yellow-400">$135 <span class="text-sm">(503A)</span></p>
-                            </div>
-                            <div class="wine-item">
-                                <p class="font-semibold">PERRIER-JOUET</p>
-                                <p class="text-sm text-gray-300">Grand Brut, France, NV</p>
-                                <p class="text-lg font-bold text-yellow-400">$145 <span class="text-sm">(506A)</span></p>
-                            </div>
-                            <div class="wine-item">
-                                <p class="font-semibold">NICOLAS FEUILLATTE</p>
-                                <p class="text-sm text-gray-300">Brut Reserve, France, NV</p>
-                                <p class="text-lg font-bold text-yellow-400">$110 <span class="text-sm">(505A)</span></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Inventory Tab -->
-        <div id="inventory-content" class="tab-content inventory-bg min-h-screen p-6 hidden">
-            <div class="container mx-auto max-w-7xl">
-                <div class="flex flex-wrap justify-between items-center mb-8">
-                    <h2 class="text-3xl font-bold mb-4 md:mb-0">Inventory Management</h2>
-                    <div class="flex flex-wrap gap-4">
-                        <button id="voiceButton" class="btn-primary px-6 py-3 rounded-lg font-semibold flex items-center gap-2">
-                            <i class="fas fa-microphone"></i>
-                            Voice Update
-                        </button>
-                        <button id="updateInventoryBtn" class="bg-darker-green px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition">
-                            <i class="fas fa-sync mr-2"></i>
-                            Update Inventory
+                    <!-- Ingredient Substitutions -->
+                    <div>
+                        <h3 class="text-lg font-semibold mb-3 text-yellow-400">Ingredient Substitutions</h3>
+                        <div id="substitutionsList" class="space-y-2">
+                            <!-- Substitutions will be populated here -->
+                        </div>
+                        <button id="addSubstitution" class="mt-3 px-3 py-1 bg-yellow-600 hover:bg-yellow-700 rounded text-sm">
+                            <i class="fas fa-plus mr-1"></i>Add Substitution
                         </button>
                     </div>
-                </div>
-                
-                <!-- Voice Recognition Status -->
-                <div id="voiceStatus" class="hidden glass-panel p-4 rounded-lg mb-6">
-                    <div class="flex items-center gap-3">
-                        <i class="fas fa-microphone recording text-red-500"></i>
-                        <span id="voiceText">Listening... Speak your inventory updates</span>
+
+                    <!-- Data Management -->
+                    <div>
+                        <h3 class="text-lg font-semibold mb-3 text-yellow-400">Data Management</h3>
+                        <div class="space-y-2">
+                            <button id="exportData" class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg">
+                                <i class="fas fa-download mr-2"></i>Export My Data
+                            </button>
+                            <button id="importData" class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg">
+                                <i class="fas fa-upload mr-2"></i>Import Data
+                            </button>
+                            <button id="clearData" class="w-full px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg">
+                                <i class="fas fa-trash mr-2"></i>Clear All Data
+                            </button>
+                        </div>
                     </div>
-                </div>
-                
-                <!-- Category Filter -->
-                <div class="glass-panel p-4 rounded-lg mb-6 overflow-x-auto">
-                    <div class="flex gap-4 flex-nowrap min-w-max">
-                        <button class="category-filter active px-4 py-2 rounded-lg bg-dark-green" data-category="all">All</button>
-                        <button class="category-filter px-4 py-2 rounded-lg bg-gray-700 hover:bg-dark-green" data-category="vodka">Vodka</button>
-                        <button class="category-filter px-4 py-2 rounded-lg bg-gray-700 hover:bg-dark-green" data-category="gin">Gin</button>
-                        <button class="category-filter px-4 py-2 rounded-lg bg-gray-700 hover:bg-dark-green" data-category="rum">Rum</button>
-                        <button class="category-filter px-4 py-2 rounded-lg bg-gray-700 hover:bg-dark-green" data-category="tequila">Tequila</button>
-                        <button class="category-filter px-4 py-2 rounded-lg bg-gray-700 hover:bg-dark-green" data-category="whiskey">Whiskey</button>
-                        <button class="category-filter px-4 py-2 rounded-lg bg-gray-700 hover:bg-dark-green" data-category="cordials">Cordials</button>
+
+                    <!-- About -->
+                    <div>
+                        <h3 class="text-lg font-semibold mb-3 text-yellow-400">About</h3>
+                        <p class="text-sm text-gray-400">
+                            My Bar v1.0<br>
+                            Powered by TheCocktailDB API<br>
+                            Built with Tailwind CSS and vanilla JavaScript
+                        </p>
                     </div>
-                </div>
-                
-                <!-- Inventory Grid -->
-                <div id="inventoryGrid" class="inventory-grid">
-                    <!-- Inventory items will be populated here -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Load the bundled JavaScript -->
-    <script src="dist/js/bundle.js"></script>
+    <!-- Import Modal -->
+    <div id="importModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-gray-800 rounded-lg max-w-md w-full">
+            <div class="p-6">
+                <h3 class="text-lg font-bold mb-4">Import Data</h3>
+                <input type="file" id="importFile" accept=".json" class="w-full mb-4">
+                <div class="flex justify-end space-x-3">
+                    <button id="cancelImport" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg">Cancel</button>
+                    <button id="confirmImport" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg">Import</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App State
+        const state = {
+            cocktails: [],
+            ingredients: [],
+            categories: [],
+            glasses: [],
+            userBar: JSON.parse(localStorage.getItem('userBar')) || [],
+            favorites: JSON.parse(localStorage.getItem('favorites')) || [],
+            customCocktails: JSON.parse(localStorage.getItem('customCocktails')) || [],
+            currentTab: 'browse',
+            filteredCocktails: [],
+            settings: {
+                theme: localStorage.getItem('theme') || 'auto',
+                showImages: localStorage.getItem('showImages') === 'true',
+                showAnimations: localStorage.getItem('showAnimations') === 'true',
+                compactMode: localStorage.getItem('compactMode') === 'true',
+                substitutions: JSON.parse(localStorage.getItem('substitutions')) || []
+            }
+        };
+
+        // API Service
+        const api = {
+            baseURL: 'https://www.thecocktaildb.com/api/json/v1/1',
+            
+            async request(endpoint) {
+                try {
+                    const response = await fetch(`${this.baseURL}${endpoint}`);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    console.error('API Error:', error);
+                    return null;
+                }
+            },
+
+            async getIngredients() {
+                return await this.request('/list.php?i=list');
+            },
+
+            async getCategories() {
+                return await this.request('/list.php?c=list');
+            },
+
+            async getGlasses() {
+                return await this.request('/list.php?g=list');
+            },
+
+            async searchByLetter(letter) {
+                return await this.request(`/search.php?f=${letter}`);
+            },
+
+            async getCocktailById(id) {
+                return await this.request(`/lookup.php?i=${id}`);
+            },
+
+            async searchByName(name) {
+                return await this.request(`/search.php?s=${encodeURIComponent(name)}`);
+            },
+
+            async getCocktailsByIngredient(ingredient) {
+                return await this.request(`/filter.php?i=${encodeURIComponent(ingredient)}`);
+            }
+        };
+
+        // UI Components
+        const ui = {
+            showLoading(container) {
+                container.innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="fas fa-spinner fa-spin text-3xl text-yellow-400"></i>
+                        <p class="mt-2">Loading...</p>
+                    </div>
+                `;
+            },
+
+            createCocktailCard(cocktail, options = {}) {
+                const canMake = options.canMake !== undefined ? options.canMake : this.canMakeCocktail(cocktail);
+                const isFavorite = state.favorites.includes(cocktail.idDrink);
+                const missingIngredients = options.missingIngredients || [];
+                const showImages = state.settings.showImages;
+                
+                return `
+                    <div class="cocktail-card bg-gray-800 rounded-lg overflow-hidden shadow-lg cursor-pointer ${state.settings.showAnimations ? 'transition-all duration-200' : ''}" data-id="${cocktail.idDrink}">
+                        <div class="relative">
+                            ${showImages ? 
+                                `<img src="${cocktail.strDrinkThumb}" alt="${cocktail.strDrink}" class="w-full h-48 object-cover">` :
+                                `<div class="w-full h-48 bg-gradient-to-br from-yellow-600 to-yellow-800 flex items-center justify-center">
+                                    <i class="fas fa-cocktail text-6xl text-white opacity-50"></i>
+                                </div>`
+                            }
+                            <div class="absolute top-2 right-2">
+                                <button class="favorite-btn p-2 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 ${isFavorite ? 'text-red-400' : 'text-gray-300'}" 
+                                        data-id="${cocktail.idDrink}" onclick="event.stopPropagation()">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            </div>
+                            ${canMake ? 
+                                '<div class="absolute top-2 left-2 bg-green-600 text-white px-2 py-1 rounded text-xs font-medium">Can Make</div>' : 
+                                missingIngredients.length > 0 ? 
+                                `<div class="absolute top-2 left-2 bg-yellow-600 text-white px-2 py-1 rounded text-xs font-medium">Need ${missingIngredients.length}</div>` : 
+                                ''
+                            }
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-semibold text-lg mb-2">${cocktail.strDrink}</h3>
+                            <p class="text-gray-400 text-sm mb-2">${cocktail.strCategory} • ${cocktail.strGlass}</p>
+                            ${missingIngredients.length > 0 ? 
+                                `<div class="text-xs text-yellow-400">Missing: ${missingIngredients.slice(0, 2).join(', ')}${missingIngredients.length > 2 ? '...' : ''}</div>` : 
+                                ''
+                            }
+                        </div>
+                    </div>
+                `;
+            },
+
+            createIngredientTag(ingredient, selected = false) {
+                return `
+                    <span class="ingredient-tag inline-block px-3 py-1 rounded-full text-sm cursor-pointer transition-all ${
+                        selected ? 'bg-yellow-600 text-white selected' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    }" data-ingredient="${ingredient}">
+                        ${ingredient}
+                        ${selected ? '<i class="fas fa-times ml-1"></i>' : ''}
+                    </span>
+                `;
+            },
+
+            canMakeCocktail(cocktail) {
+                if (!cocktail.ingredients) return false;
+                const requiredIngredients = cocktail.ingredients.filter(ing => ing.name && ing.name.trim());
+                return requiredIngredients.every(ing => 
+                    state.userBar.some(userIng => 
+                        this.ingredientsMatch(ing.name.toLowerCase(), userIng.toLowerCase())
+                    )
+                );
+            },
+
+            ingredientsMatch(ingredient1, ingredient2) {
+                if (ingredient1 === ingredient2) return true;
+                
+                // Use custom substitutions from settings
+                const customSubstitutions = state.settings.substitutions;
+                for (const sub of customSubstitutions) {
+                    if (sub.original.toLowerCase() === ingredient1 && sub.substitute.toLowerCase() === ingredient2) return true;
+                    if (sub.original.toLowerCase() === ingredient2 && sub.substitute.toLowerCase() === ingredient1) return true;
+                }
+                
+                const substitutions = {
+                    'light rum': ['white rum', 'silver rum'],
+                    'dark rum': ['aged rum', 'gold rum'],
+                    'dry vermouth': ['white vermouth'],
+                    'sweet vermouth': ['red vermouth'],
+                    'lime juice': ['fresh lime juice'],
+                    'lemon juice': ['fresh lemon juice']
+                };
+
+                for (const [key, alternatives] of Object.entries(substitutions)) {
+                    if (key === ingredient1 && alternatives.includes(ingredient2)) return true;
+                    if (key === ingredient2 && alternatives.includes(ingredient1)) return true;
+                }
+
+                return ingredient1.includes(ingredient2) || ingredient2.includes(ingredient1);
+            },
+
+            applyTheme(theme) {
+                const body = document.body;
+                const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                
+                if (theme === 'auto') {
+                    theme = isDark ? 'dark' : 'light';
+                }
+                
+                if (theme === 'light') {
+                    body.classList.remove('bg-gray-900', 'text-white');
+                    body.classList.add('bg-gray-100', 'text-gray-900');
+                    document.querySelectorAll('.bg-gray-800').forEach(el => {
+                        el.classList.remove('bg-gray-800');
+                        el.classList.add('bg-white', 'border', 'border-gray-200');
+                    });
+                } else {
+                    body.classList.remove('bg-gray-100', 'text-gray-900');
+                    body.classList.add('bg-gray-900', 'text-white');
+                    document.querySelectorAll('.bg-white').forEach(el => {
+                        el.classList.remove('bg-white', 'border', 'border-gray-200');
+                        el.classList.add('bg-gray-800');
+                    });
+                }
+            },
+
+            showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
+                
+                const colors = {
+                    success: 'bg-green-600 text-white',
+                    error: 'bg-red-600 text-white',
+                    info: 'bg-blue-600 text-white',
+                    warning: 'bg-yellow-600 text-white'
+                };
+                
+                notification.classList.add(colors[type]);
+                notification.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : 'info'} mr-2"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.classList.remove('translate-x-full');
+                }, 100);
+                
+                setTimeout(() => {
+                    notification.classList.add('translate-x-full');
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 3000);
+            }
+        };
+
+        // Data Management
+        const data = {
+            async loadAllData() {
+                const loadingElement = document.getElementById('loadingBrowse');
+                
+                try {
+                    // Load basic data
+                    const [ingredientsData, categoriesData, glassesData] = await Promise.all([
+                        api.getIngredients(),
+                        api.getCategories(),
+                        api.getGlasses()
+                    ]);
+
+                    if (ingredientsData?.drinks) {
+                        state.ingredients = ingredientsData.drinks.map(item => item.strIngredient1);
+                    }
+                    if (categoriesData?.drinks) {
+                        state.categories = categoriesData.drinks.map(item => item.strCategory);
+                    }
+                    if (glassesData?.drinks) {
+                        state.glasses = glassesData.drinks.map(item => item.strGlass);
+                    }
+
+                    // Load cocktails by alphabet
+                    const cocktailPromises = [];
+                    for (let i = 0; i < 26; i++) {
+                        const letter = String.fromCharCode(97 + i); // a-z
+                        cocktailPromises.push(api.searchByLetter(letter));
+                    }
+
+                    const cocktailResults = await Promise.all(cocktailPromises);
+                    state.cocktails = [];
+                    
+                    for (const result of cocktailResults) {
+                        if (result?.drinks) {
+                            for (const cocktail of result.drinks) {
+                                // Parse ingredients
+                                cocktail.ingredients = [];
+                                for (let i = 1; i <= 15; i++) {
+                                    const ingredient = cocktail[`strIngredient${i}`];
+                                    const measure = cocktail[`strMeasure${i}`];
+                                    if (ingredient && ingredient.trim()) {
+                                        cocktail.ingredients.push({
+                                            name: ingredient.trim(),
+                                            measure: measure ? measure.trim() : null
+                                        });
+                                    }
+                                }
+                                state.cocktails.push(cocktail);
+                            }
+                        }
+                    }
+
+                    // Remove duplicates
+                    state.cocktails = state.cocktails.filter((cocktail, index, self) => 
+                        index === self.findIndex(c => c.idDrink === cocktail.idDrink)
+                    );
+
+                    this.populateFilters();
+                    this.renderCurrentTab();
+                    
+                } catch (error) {
+                    console.error('Error loading data:', error);
+                    if (loadingElement) {
+                        loadingElement.innerHTML = `
+                            <div class="text-center py-8 text-red-400">
+                                <i class="fas fa-exclamation-triangle text-3xl mb-2"></i>
+                                <p>Error loading data. Please refresh the page.</p>
+                            </div>
+                        `;
+                    }
+                }
+            },
+
+            populateFilters() {
+                // Populate category filter
+                const categoryFilter = document.getElementById('categoryFilter');
+                state.categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category;
+                    option.textContent = category;
+                    categoryFilter.appendChild(option);
+                });
+
+                // Populate glass filter
+                const glassFilter = document.getElementById('glassFilter');
+                state.glasses.forEach(glass => {
+                    const option = document.createElement('option');
+                    option.value = glass;
+                    option.textContent = glass;
+                    glassFilter.appendChild(option);
+                });
+            },
+
+            filterCocktails() {
+                const category = document.getElementById('categoryFilter').value;
+                const glass = document.getElementById('glassFilter').value;
+                const alcoholic = document.getElementById('alcoholicFilter').value;
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+                state.filteredCocktails = state.cocktails.filter(cocktail => {
+                    const matchesCategory = !category || cocktail.strCategory === category;
+                    const matchesGlass = !glass || cocktail.strGlass === glass;
+                    const matchesAlcoholic = !alcoholic || cocktail.strAlcoholic === alcoholic;
+                    const matchesSearch = !searchTerm || 
+                        cocktail.strDrink.toLowerCase().includes(searchTerm) ||
+                        cocktail.ingredients.some(ing => ing.name.toLowerCase().includes(searchTerm));
+
+                    return matchesCategory && matchesGlass && matchesAlcoholic && matchesSearch;
+                });
+
+                this.renderBrowseTab();
+            },
+
+            renderCurrentTab() {
+                switch (state.currentTab) {
+                    case 'browse':
+                        this.renderBrowseTab();
+                        break;
+                    case 'mybar':
+                        this.renderMyBarTab();
+                        break;
+                    case 'mycocktails':
+                        this.renderMyCocktailsTab();
+                        break;
+                    case 'favorites':
+                        this.renderFavoritesTab();
+                        break;
+                    case 'custom':
+                        this.renderCustomTab();
+                        break;
+                }
+            },
+
+            renderBrowseTab() {
+                const container = document.getElementById('allCocktails');
+                const cocktails = state.filteredCocktails.length > 0 ? state.filteredCocktails : state.cocktails;
+                
+                if (cocktails.length === 0) {
+                    container.innerHTML = `
+                        <div class="col-span-full text-center py-12 text-gray-400">
+                            <i class="fas fa-cocktail text-6xl mb-4"></i>
+                            <p class="text-lg">No cocktails found</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = cocktails.slice(0, 20).map(cocktail => ui.createCocktailCard(cocktail)).join('');
+                document.getElementById('loadingBrowse').style.display = 'none';
+            },
+
+            renderMyBarTab() {
+                const categories = {
+                    spirits: [],
+                    liqueurs: [],
+                    mixers: [],
+                    others: []
+                };
+
+                state.userBar.forEach(ingredient => {
+                    const category = this.categorizeIngredient(ingredient);
+                    categories[category].push(ingredient);
+                });
+
+                // Update counts
+                document.getElementById('spiritsCount').textContent = categories.spirits.length;
+                document.getElementById('liqueursCount').textContent = categories.liqueurs.length;
+                document.getElementById('mixersCount').textContent = categories.mixers.length;
+                document.getElementById('othersCount').textContent = categories.others.length;
+                document.getElementById('barCount').textContent = state.userBar.length;
+
+                // Render ingredients
+                ['spirits', 'liqueurs', 'mixers', 'others'].forEach(category => {
+                    const container = document.getElementById(`${category}Container`);
+                    if (categories[category].length === 0) {
+                        container.innerHTML = '<p class="text-gray-400 text-sm">No ingredients added</p>';
+                    } else {
+                        container.innerHTML = categories[category]
+                            .map(ingredient => ui.createIngredientTag(ingredient, true))
+                            .join('');
+                    }
+                });
+            },
+
+            renderMyCocktailsTab() {
+                const canMake = [];
+                const almostCanMake = [];
+
+                state.cocktails.forEach(cocktail => {
+                    const analysis = this.analyzeCocktail(cocktail);
+                    if (analysis.canMake) {
+                        canMake.push(cocktail);
+                    } else if (analysis.missingCount <= 2 && analysis.missingCount > 0) {
+                        almostCanMake.push({ ...cocktail, missingIngredients: analysis.missingIngredients });
+                    }
+                });
+
+                // Update counts
+                document.getElementById('canMakeCount').textContent = canMake.length;
+                document.getElementById('almostCanMakeCount').textContent = almostCanMake.length;
+
+                // Render cocktails
+                const canMakeContainer = document.getElementById('canMakeCocktails');
+                const almostCanMakeContainer = document.getElementById('almostCanMakeCocktails');
+
+                if (canMake.length === 0) {
+                    canMakeContainer.innerHTML = '<p class="text-gray-400 text-center col-span-full">Add ingredients to your bar to see cocktails you can make!</p>';
+                } else {
+                    canMakeContainer.innerHTML = canMake.slice(0, 6).map(cocktail => 
+                        ui.createCocktailCard(cocktail, { canMake: true })
+                    ).join('');
+                }
+
+                if (almostCanMake.length === 0) {
+                    almostCanMakeContainer.innerHTML = '<p class="text-gray-400 text-center col-span-full">No cocktails missing just a few ingredients.</p>';
+                } else {
+                    almostCanMakeContainer.innerHTML = almostCanMake.slice(0, 6).map(cocktail => 
+                        ui.createCocktailCard(cocktail, { 
+                            canMake: false, 
+                            missingIngredients: cocktail.missingIngredients.map(ing => ing.name) 
+                        })
+                    ).join('');
+                }
+            },
+
+            renderFavoritesTab() {
+                const container = document.getElementById('favoriteCocktails');
+                const noFavoritesMsg = document.getElementById('noFavorites');
+                
+                if (state.favorites.length === 0) {
+                    container.style.display = 'none';
+                    noFavoritesMsg.style.display = 'block';
+                } else {
+                    container.style.display = 'grid';
+                    noFavoritesMsg.style.display = 'none';
+                    
+                    const favoriteCocktails = state.cocktails.filter(cocktail => 
+                        state.favorites.includes(cocktail.idDrink)
+                    );
+                    
+                    container.innerHTML = favoriteCocktails.map(cocktail => ui.createCocktailCard(cocktail)).join('');
+                }
+            },
+
+            renderCustomTab() {
+                const container = document.getElementById('customCocktails');
+                const noCustomMsg = document.getElementById('noCustom');
+                
+                if (state.customCocktails.length === 0) {
+                    container.style.display = 'none';
+                    noCustomMsg.style.display = 'block';
+                } else {
+                    container.style.display = 'grid';
+                    noCustomMsg.style.display = 'none';
+                    
+                    container.innerHTML = state.customCocktails.map(cocktail => `
+                        <div class="cocktail-card bg-gray-800 rounded-lg overflow-hidden shadow-lg cursor-pointer" data-custom-id="${cocktail.id}">
+                            <div class="bg-gradient-to-br from-purple-600 to-purple-800 h-48 flex items-center justify-center">
+                                <i class="fas fa-flask text-6xl text-white opacity-50"></i>
+                            </div>
+                            <div class="p-4">
+                                <h3 class="font-semibold text-lg mb-2">${cocktail.name}</h3>
+                                <p class="text-gray-400 text-sm">Custom Recipe</p>
+                                <div class="mt-2 flex justify-between">
+                                    <button class="text-blue-400 hover:text-blue-300 text-sm" onclick="event.stopPropagation(); editCustomCocktail('${cocktail.id}')">
+                                        <i class="fas fa-edit mr-1"></i>Edit
+                                    </button>
+                                    <button class="text-red-400 hover:text-red-300 text-sm" onclick="event.stopPropagation(); deleteCustomCocktail('${cocktail.id}')">
+                                        <i class="fas fa-trash mr-1"></i>Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            },
+
+            categorizeIngredient(ingredient) {
+                const lower = ingredient.toLowerCase();
+                
+                const spirits = ['vodka', 'gin', 'rum', 'whiskey', 'whisky', 'tequila', 'brandy', 'cognac', 'bourbon', 'scotch'];
+                const liqueurs = ['liqueur', 'schnapps', 'amaretto', 'kahlua', 'baileys', 'cointreau', 'triple sec', 'grand marnier'];
+                const mixers = ['juice', 'soda', 'water', 'syrup', 'bitters', 'tonic', 'ginger ale', 'club soda'];
+                
+                if (spirits.some(spirit => lower.includes(spirit))) return 'spirits';
+                if (liqueurs.some(liqueur => lower.includes(liqueur))) return 'liqueurs';
+                if (mixers.some(mixer => lower.includes(mixer))) return 'mixers';
+                
+                return 'others';
+            },
+
+            analyzeCocktail(cocktail) {
+                const requiredIngredients = cocktail.ingredients.filter(ing => ing.name && ing.name.trim());
+                const missingIngredients = requiredIngredients.filter(ing => 
+                    !state.userBar.some(userIng => 
+                        ui.ingredientsMatch(ing.name.toLowerCase(), userIng.toLowerCase())
+                    )
+                );
+
+                return {
+                    canMake: missingIngredients.length === 0,
+                    missingIngredients,
+                    missingCount: missingIngredients.length,
+                    totalRequired: requiredIngredients.length
+                };
+            }
+        };
+
+        // Event Handlers
+        function switchTab(tabName) {
+            // Update active tab
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+
+            // Show selected tab content
+            document.getElementById(`${tabName}Tab`).classList.remove('hidden');
+            
+            state.currentTab = tabName;
+            data.renderCurrentTab();
+        }
+
+        function toggleFavorite(cocktailId) {
+            const index = state.favorites.indexOf(cocktailId);
+            if (index === -1) {
+                state.favorites.push(cocktailId);
+            } else {
+                state.favorites.splice(index, 1);
+            }
+            localStorage.setItem('favorites', JSON.stringify(state.favorites));
+            data.renderCurrentTab();
+        }
+
+        function showCocktailDetail(cocktailId, isCustom = false) {
+            const modal = document.getElementById('cocktailModal');
+            const title = document.getElementById('modalTitle');
+            const content = document.getElementById('modalContent');
+
+            let cocktail;
+            if (isCustom) {
+                cocktail = state.customCocktails.find(c => c.id === cocktailId);
+                if (!cocktail) return;
+
+                title.textContent = cocktail.name;
+                content.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="bg-gradient-to-br from-purple-600 to-purple-800 h-64 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-flask text-8xl text-white opacity-50"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2">Instructions</h3>
+                            <p class="text-gray-300">${cocktail.instructions}</p>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2">Ingredients</h3>
+                            <ul class="space-y-1">
+                                ${cocktail.ingredients.map(ing => `
+                                    <li class="flex justify-between">
+                                        <span>${ing.name}</span>
+                                        <span class="text-gray-400">${ing.measure || ''}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            } else {
+                cocktail = state.cocktails.find(c => c.idDrink === cocktailId);
+                if (!cocktail) return;
+
+                const canMake = ui.canMakeCocktail(cocktail);
+                const isFavorite = state.favorites.includes(cocktailId);
+
+                title.textContent = cocktail.strDrink;
+                content.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="relative">
+                            <img src="${cocktail.strDrinkThumb}" alt="${cocktail.strDrink}" class="w-full h-64 object-cover rounded-lg">
+                            <div class="absolute top-4 right-4">
+                                <button class="favorite-btn p-3 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 ${isFavorite ? 'text-red-400' : 'text-gray-300'}" 
+                                        data-id="${cocktailId}">
+                                    <i class="fas fa-heart text-xl"></i>
+                                </button>
+                            </div>
+                            ${canMake ? 
+                                '<div class="absolute top-4 left-4 bg-green-600 text-white px-3 py-2 rounded-lg font-medium">You Can Make This!</div>' : 
+                                '<div class="absolute top-4 left-4 bg-yellow-600 text-white px-3 py-2 rounded-lg font-medium">Missing Ingredients</div>'
+                            }
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <span class="text-gray-400">Category:</span>
+                                <span class="ml-2">${cocktail.strCategory}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-400">Glass:</span>
+                                <span class="ml-2">${cocktail.strGlass}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-400">Type:</span>
+                                <span class="ml-2">${cocktail.strAlcoholic}</span>
+                            </div>
+                            ${cocktail.strIBA ? `
+                                <div>
+                                    <span class="text-gray-400">IBA:</span>
+                                    <span class="ml-2">${cocktail.strIBA}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2">Instructions</h3>
+                            <p class="text-gray-300">${cocktail.strInstructions}</p>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2">Ingredients</h3>
+                            <ul class="space-y-1">
+                                ${cocktail.ingredients.map(ing => {
+                                    const hasIngredient = state.userBar.some(userIng => 
+                                        ui.ingredientsMatch(ing.name.toLowerCase(), userIng.toLowerCase())
+                                    );
+                                    return `
+                                        <li class="flex justify-between items-center">
+                                            <span class="${hasIngredient ? 'text-green-400' : 'text-red-400'}">${ing.name}</span>
+                                            <span class="text-gray-400">${ing.measure || ''}</span>
+                                            ${hasIngredient ? '<i class="fas fa-check text-green-400"></i>' : '<i class="fas fa-times text-red-400"></i>'}
+                                        </li>
+                                    `;
+                                }).join('')}
+                            </ul>
+                        </div>
+                        ${cocktail.strVideo ? `
+                            <div>
+                                <h3 class="text-lg font-semibold mb-2">Video Tutorial</h3>
+                                <a href="${cocktail.strVideo}" target="_blank" class="text-blue-400 hover:text-blue-300">
+                                    <i class="fab fa-youtube mr-2"></i>Watch on YouTube
+                                </a>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function showIngredientModal() {
+            const modal = document.getElementById('ingredientModal');
+            const list = document.getElementById('ingredientList');
+            
+            list.innerHTML = state.ingredients.map(ingredient => {
+                const selected = state.userBar.includes(ingredient);
+                return `
+                    <button class="ingredient-selector p-2 text-left rounded-lg transition-colors ${
+                        selected ? 'bg-yellow-600 text-white' : 'bg-gray-700 hover:bg-gray-600'
+                    }" data-ingredient="${ingredient}">
+                        ${ingredient}
+                        ${selected ? '<i class="fas fa-check float-right mt-1"></i>' : ''}
+                    </button>
+                `;
+            }).join('');
+
+            modal.classList.remove('hidden');
+        }
+
+        function addCustomIngredientField() {
+            const container = document.getElementById('customIngredients');
+            const index = container.children.length;
+            
+            const div = document.createElement('div');
+            div.className = 'flex space-x-2';
+            div.innerHTML = `
+                <input type="text" placeholder="Ingredient name" class="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded">
+                <input type="text" placeholder="Amount" class="w-24 px-3 py-2 bg-gray-700 border border-gray-600 rounded">
+                <button type="button" class="px-3 py-2 bg-red-600 hover:bg-red-700 rounded" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            container.appendChild(div);
+        }
+
+        function createCustomCocktail(formData) {
+            const name = formData.get('name');
+            const instructions = formData.get('instructions');
+            
+            const ingredients = [];
+            const ingredientInputs = document.querySelectorAll('#customIngredients > div');
+            ingredientInputs.forEach(div => {
+                const nameInput = div.querySelector('input[placeholder="Ingredient name"]');
+                const measureInput = div.querySelector('input[placeholder="Amount"]');
+                if (nameInput.value.trim()) {
+                    ingredients.push({
+                        name: nameInput.value.trim(),
+                        measure: measureInput.value.trim() || null
+                    });
+                }
+            });
+
+            const cocktail = {
+                id: Date.now().toString(),
+                name,
+                instructions,
+                ingredients,
+                createdAt: new Date().toISOString()
+            };
+
+            state.customCocktails.push(cocktail);
+            localStorage.setItem('customCocktails', JSON.stringify(state.customCocktails));
+            
+            document.getElementById('customModal').classList.add('hidden');
+            document.getElementById('customCocktailForm').reset();
+            document.getElementById('customIngredients').innerHTML = '';
+            
+            if (state.currentTab === 'custom') {
+                data.renderCustomTab();
+            }
+        }
+
+        function deleteCustomCocktail(id) {
+            if (confirm('Are you sure you want to delete this custom cocktail?')) {
+                state.customCocktails = state.customCocktails.filter(c => c.id !== id);
+                localStorage.setItem('customCocktails', JSON.stringify(state.customCocktails));
+                data.renderCustomTab();
+            }
+        }
+
+        // Settings and Data Management
+        function showSettingsModal() {
+            const modal = document.getElementById('settingsModal');
+            
+            // Populate current settings
+            document.getElementById('showImages').checked = state.settings.showImages;
+            document.getElementById('showAnimations').checked = state.settings.showAnimations;
+            document.getElementById('compactMode').checked = state.settings.compactMode;
+            
+            // Update theme buttons
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('border-yellow-400');
+                if (btn.dataset.theme === state.settings.theme) {
+                    btn.classList.add('border-yellow-400');
+                }
+            });
+            
+            // Populate substitutions
+            renderSubstitutions();
+            
+            modal.classList.remove('hidden');
+        }
+
+        function renderSubstitutions() {
+            const container = document.getElementById('substitutionsList');
+            container.innerHTML = state.settings.substitutions.map((sub, index) => `
+                <div class="flex items-center space-x-2 p-2 bg-gray-700 rounded">
+                    <span class="text-sm">${sub.original} → ${sub.substitute}</span>
+                    <button onclick="removeSubstitution(${index})" class="text-red-400 hover:text-red-300">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function addSubstitution() {
+            const original = prompt('Enter original ingredient:');
+            const substitute = prompt('Enter substitute ingredient:');
+            
+            if (original && substitute) {
+                state.settings.substitutions.push({ original, substitute });
+                localStorage.setItem('substitutions', JSON.stringify(state.settings.substitutions));
+                renderSubstitutions();
+                ui.showNotification('Substitution added!', 'success');
+            }
+        }
+
+        function removeSubstitution(index) {
+            state.settings.substitutions.splice(index, 1);
+            localStorage.setItem('substitutions', JSON.stringify(state.settings.substitutions));
+            renderSubstitutions();
+            ui.showNotification('Substitution removed!', 'info');
+        }
+
+        function exportData() {
+            const data = {
+                userBar: state.userBar,
+                favorites: state.favorites,
+                customCocktails: state.customCocktails,
+                settings: state.settings,
+                exportDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `my-bar-data-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            ui.showNotification('Data exported successfully!', 'success');
+        }
+
+        function importData() {
+            document.getElementById('importModal').classList.remove('hidden');
+        }
+
+        function clearData() {
+            if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
+                localStorage.clear();
+                state.userBar = [];
+                state.favorites = [];
+                state.customCocktails = [];
+                state.settings = {
+                    theme: 'auto',
+                    showImages: true,
+                    showAnimations: true,
+                    compactMode: false,
+                    substitutions: []
+                };
+                
+                data.renderCurrentTab();
+                ui.showNotification('All data cleared!', 'warning');
+            }
+        }
+
+        function handleImport() {
+            const file = document.getElementById('importFile').files[0];
+            if (!file) {
+                ui.showNotification('Please select a file!', 'error');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (data.userBar) state.userBar = data.userBar;
+                    if (data.favorites) state.favorites = data.favorites;
+                    if (data.customCocktails) state.customCocktails = data.customCocktails;
+                    if (data.settings) state.settings = data.settings;
+                    
+                    localStorage.setItem('userBar', JSON.stringify(state.userBar));
+                    localStorage.setItem('favorites', JSON.stringify(state.favorites));
+                    localStorage.setItem('customCocktails', JSON.stringify(state.customCocktails));
+                    localStorage.setItem('substitutions', JSON.stringify(state.settings.substitutions));
+                    
+                    document.getElementById('importModal').classList.add('hidden');
+                    data.renderCurrentTab();
+                    ui.showNotification('Data imported successfully!', 'success');
+                } catch (error) {
+                    ui.showNotification('Invalid file format!', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab navigation
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    switchTab(this.dataset.tab);
+                });
+            });
+
+            // Search functionality
+            document.getElementById('searchBtn').addEventListener('click', function() {
+                const searchBar = document.getElementById('searchBar');
+                searchBar.classList.toggle('hidden');
+                if (!searchBar.classList.contains('hidden')) {
+                    document.getElementById('searchInput').focus();
+                }
+            });
+
+            document.getElementById('searchInput').addEventListener('input', function() {
+                data.filterCocktails();
+            });
+
+            // Filter functionality
+            document.getElementById('categoryFilter').addEventListener('change', () => data.filterCocktails());
+            document.getElementById('glassFilter').addEventListener('change', () => data.filterCocktails());
+            document.getElementById('alcoholicFilter').addEventListener('change', () => data.filterCocktails());
+
+            // Modal functionality
+            document.getElementById('closeModal').addEventListener('click', function() {
+                document.getElementById('cocktailModal').classList.add('hidden');
+            });
+
+            document.getElementById('addIngredientBtn').addEventListener('click', showIngredientModal);
+            
+            document.getElementById('closeIngredientModal').addEventListener('click', function() {
+                document.getElementById('ingredientModal').classList.add('hidden');
+            });
+
+            // Ingredient search
+            document.getElementById('ingredientSearch').addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const buttons = document.querySelectorAll('.ingredient-selector');
+                buttons.forEach(button => {
+                    const ingredient = button.dataset.ingredient.toLowerCase();
+                    button.style.display = ingredient.includes(searchTerm) ? 'block' : 'none';
+                });
+            });
+
+            // Custom cocktail modal
+            document.getElementById('createCustomBtn').addEventListener('click', function() {
+                document.getElementById('customModal').classList.remove('hidden');
+            });
+
+            document.getElementById('closeCustomModal').addEventListener('click', function() {
+                document.getElementById('customModal').classList.add('hidden');
+            });
+
+            document.getElementById('cancelCustom').addEventListener('click', function() {
+                document.getElementById('customModal').classList.add('hidden');
+            });
+
+            document.getElementById('addCustomIngredient').addEventListener('click', addCustomIngredientField);
+
+            document.getElementById('customCocktailForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                formData.set('name', document.getElementById('customName').value);
+                formData.set('instructions', document.getElementById('customInstructions').value);
+                createCustomCocktail(formData);
+            });
+
+            // Settings and Data Management
+            document.getElementById('settingsBtn').addEventListener('click', showSettingsModal);
+            document.getElementById('closeSettingsModal').addEventListener('click', function() {
+                document.getElementById('settingsModal').classList.add('hidden');
+            });
+
+            document.getElementById('exportData').addEventListener('click', exportData);
+            document.getElementById('importData').addEventListener('click', importData);
+            document.getElementById('clearData').addEventListener('click', clearData);
+            document.getElementById('confirmImport').addEventListener('click', handleImport);
+            document.getElementById('cancelImport').addEventListener('click', function() {
+                document.getElementById('importModal').classList.add('hidden');
+            });
+
+            // Click outside modal to close
+            document.addEventListener('click', function(e) {
+                const modals = ['cocktailModal', 'ingredientModal', 'customModal', 'settingsModal', 'importModal'];
+                modals.forEach(modalId => {
+                    const modal = document.getElementById(modalId);
+                    if (e.target === modal) {
+                        modal.classList.add('hidden');
+                    }
+                });
+            });
+
+            // Settings event handlers
+            document.getElementById('showImages').addEventListener('change', function() {
+                state.settings.showImages = this.checked;
+                localStorage.setItem('showImages', this.checked);
+                data.renderCurrentTab();
+            });
+
+            document.getElementById('showAnimations').addEventListener('change', function() {
+                state.settings.showAnimations = this.checked;
+                localStorage.setItem('showAnimations', this.checked);
+            });
+
+            document.getElementById('compactMode').addEventListener('change', function() {
+                state.settings.compactMode = this.checked;
+                localStorage.setItem('compactMode', this.checked);
+                data.renderCurrentTab();
+            });
+
+            // Theme buttons
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const theme = this.dataset.theme;
+                    state.settings.theme = theme;
+                    localStorage.setItem('theme', theme);
+                    ui.applyTheme(theme);
+                    
+                    // Update active button
+                    document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('border-yellow-400'));
+                    this.classList.add('border-yellow-400');
+                });
+            });
+
+            // Substitutions
+            document.getElementById('addSubstitution').addEventListener('click', addSubstitution);
+
+            // Delegated event listeners
+            document.addEventListener('click', function(e) {
+                // Cocktail cards
+                if (e.target.closest('.cocktail-card')) {
+                    const card = e.target.closest('.cocktail-card');
+                    const cocktailId = card.dataset.id;
+                    const customId = card.dataset.customId;
+                    
+                    if (cocktailId) {
+                        showCocktailDetail(cocktailId);
+                    } else if (customId) {
+                        showCocktailDetail(customId, true);
+                    }
+                }
+
+                // Favorite buttons
+                if (e.target.closest('.favorite-btn')) {
+                    const button = e.target.closest('.favorite-btn');
+                    const cocktailId = button.dataset.id;
+                    toggleFavorite(cocktailId);
+                    ui.showNotification('Favorite updated!', 'success');
+                }
+
+                // Ingredient selectors
+                if (e.target.closest('.ingredient-selector')) {
+                    const button = e.target.closest('.ingredient-selector');
+                    const ingredient = button.dataset.ingredient;
+                    
+                    if (state.userBar.includes(ingredient)) {
+                        state.userBar = state.userBar.filter(ing => ing !== ingredient);
+                        button.classList.remove('bg-yellow-600', 'text-white');
+                        button.classList.add('bg-gray-700', 'hover:bg-gray-600');
+                        button.innerHTML = ingredient;
+                        ui.showNotification(`${ingredient} removed from your bar`, 'info');
+                    } else {
+                        state.userBar.push(ingredient);
+                        button.classList.remove('bg-gray-700', 'hover:bg-gray-600');
+                        button.classList.add('bg-yellow-600', 'text-white');
+                        button.innerHTML = `${ingredient} <i class="fas fa-check float-right mt-1"></i>`;
+                        ui.showNotification(`${ingredient} added to your bar`, 'success');
+                    }
+                    
+                    localStorage.setItem('userBar', JSON.stringify(state.userBar));
+                    data.renderMyBarTab();
+                    
+                    if (state.currentTab === 'mycocktails') {
+                        data.renderMyCocktailsTab();
+                    }
+                }
+
+                // Ingredient tags in My Bar
+                if (e.target.closest('.ingredient-tag.selected')) {
+                    const tag = e.target.closest('.ingredient-tag');
+                    const ingredient = tag.dataset.ingredient;
+                    
+                    state.userBar = state.userBar.filter(ing => ing !== ingredient);
+                    localStorage.setItem('userBar', JSON.stringify(state.userBar));
+                    data.renderMyBarTab();
+                    ui.showNotification(`${ingredient} removed from your bar`, 'info');
+                }
+            });
+
+            // Add CSS for active tab and enhanced styling
+            const style = document.createElement('style');
+            style.textContent = `
+                .nav-tab.active {
+                    background-color: #1F2937;
+                    border-bottom: 2px solid #D4AF37;
+                    color: #D4AF37;
+                }
+                .nav-tab:not(.active) {
+                    color: #9CA3AF;
+                }
+                .nav-tab:not(.active):hover {
+                    color: #D1D5DB;
+                    background-color: #374151;
+                }
+                
+                .cocktail-card:hover {
+                    transform: translateY(-4px);
+                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+                }
+                
+                .compact-mode .cocktail-card {
+                    transform: scale(0.95);
+                }
+                
+                .compact-mode .cocktail-card:hover {
+                    transform: scale(1);
+                }
+                
+                @media (prefers-reduced-motion: reduce) {
+                    .cocktail-card,
+                    .ingredient-tag,
+                    .nav-tab {
+                        transition: none !important;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+
+            // Initialize theme
+            ui.applyTheme(state.settings.theme);
+            
+            // Apply compact mode if enabled
+            if (state.settings.compactMode) {
+                document.body.classList.add('compact-mode');
+            }
+
+            // Load initial data
+            data.loadAllData();
+        });
+
+        // Global functions for inline event handlers
+        window.editCustomCocktail = function(id) {
+            // Implementation for editing custom cocktails
+            console.log('Edit custom cocktail:', id);
+        };
+
+        window.deleteCustomCocktail = deleteCustomCocktail;
+        window.removeSubstitution = removeSubstitution;
+    </script>
 </body>
 </html>

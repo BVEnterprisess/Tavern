@@ -49,6 +49,13 @@
     background-attachment: fixed;
 }
 
+.cocktails-bg {
+    background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('https://images.stockcake.com/public/f/3/c/f3cab94a-6edb-44f9-adf2-c82fa6e8b374_large/elegant-cocktail-evening-stockcake.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
 .btn-primary {
     background-color: #1a3b1a;
     border-color: #1a3b1a;
@@ -73,8 +80,7 @@
 
 .glass-panel {
     background: rgba(255, 255, 255, 0.1);
-    -webkit-backdrop-filter: blur(10px);
-            backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
@@ -230,7 +236,7 @@
 }
 
 /* Optimize background images */
-.login-bg, .dashboard-bg, .inventory-bg, .wine-bg, .staff-bg, .admin-bg {
+.login-bg, .dashboard-bg, .inventory-bg, .wine-bg, .staff-bg, .admin-bg, .cocktails-bg {
     background-attachment: scroll; /* Better performance than fixed */
     will-change: transform;
 }
@@ -256,4 +262,4 @@
 @keyframes fade-out {
     from { opacity: 1; }
     to { opacity: 0; }
-} 
+}

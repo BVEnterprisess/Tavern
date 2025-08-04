@@ -82,7 +82,9 @@ export class UltraEnhancedOCRService {
         };
     }
 
-    async processImage(imageFile) {
+    async processImage(imageFile, options = {}) {
+        const { menuType, specializedProcessing = false } = options;
+        
         // Check cache first
         const cacheKey = await this.generateCacheKey(imageFile);
         if (this.cache.has(cacheKey)) {
@@ -99,27 +101,28 @@ export class UltraEnhancedOCRService {
         }
 
         try {
-            this.updateProgress(10, 'Advanced image preprocessing...');
+            this.updateProgress(10, `Advanced image preprocessing for ${menuType || 'menu'}...`);
             const preprocessedImages = await this.createMultiplePreprocessedVersions(imageFile);
             
             this.updateProgress(30, 'Multi-engine text extraction...');
             const allResults = await this.extractTextWithMultipleEngines(preprocessedImages);
             
             this.updateProgress(60, 'AI-powered text correction...');
-            const correctedResults = await this.correctTextWithAI(allResults);
+            const correctedResults = await this.correctTextWithAI(allResults, menuType);
             
-            this.updateProgress(80, 'Advanced menu parsing...');
-            const result = await this.parseMenuWithAdvancedAlgorithms(correctedResults);
+            this.updateProgress(80, `Advanced ${menuType || 'menu'} parsing...`);
+            const result = await this.parseMenuWithAdvancedAlgorithms(correctedResults, menuType);
             
             this.updateProgress(95, 'Validation and confidence scoring...');
-            const validatedResult = await this.validateAndScoreResults(result);
+            const validatedResult = await this.validateAndScoreResults(result, menuType);
             
             this.updateProgress(100, 'Processing complete!');
             
-            // Cache the result
+            // Cache the result with menu type context
             this.cache.set(cacheKey, {
                 result: validatedResult,
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                menuType: menuType
             });
             
             return validatedResult;
@@ -327,11 +330,11 @@ export class UltraEnhancedOCRService {
         return allResults;
     }
 
-    async correctTextWithAI(allResults) {
+    async correctTextWithAI(allResults, menuType) {
         const correctedResults = [];
         
         for (const result of allResults) {
-            const correctedText = await this.applyTextCorrection(result.text);
+            const correctedText = await this.applyTextCorrection(result.text, menuType);
             correctedResults.push({
                 ...result,
                 correctedText,
@@ -342,7 +345,33 @@ export class UltraEnhancedOCRService {
         return correctedResults;
     }
 
-    async applyTextCorrection(text) {
+    async applyTextCorrection(text, menuType) {
+        let correctedText = text;
+        
+        // Apply specialized corrections based on menu type
+        switch (menuType) {
+            case 'wine':
+                correctedText = await this.applyWineCorrections(correctedText);
+                break;
+            case 'cocktails':
+                correctedText = await this.applyCocktailCorrections(correctedText);
+                break;
+            case 'food':
+                correctedText = await this.applyFoodCorrections(correctedText);
+                break;
+            case 'featured':
+            case 'specials':
+                correctedText = await this.applyFeaturedCorrections(correctedText);
+                break;
+            default:
+                // Apply all corrections for general menu
+                correctedText = await this.applyGeneralCorrections(correctedText);
+        }
+        
+        return correctedText;
+    }
+
+    async applyWineCorrections(text) {
         let correctedText = text;
         
         // Wine name correction
@@ -359,6 +388,32 @@ export class UltraEnhancedOCRService {
             correctedText = correctedText.replace(pattern, region);
         }
         
+        return correctedText;
+    }
+
+    async applyCocktailCorrections(text) {
+        let correctedText = text;
+        
+        // Cocktail-specific vocabulary
+        const cocktailVocabulary = {
+            spirits: ['Vodka', 'Gin', 'Rum', 'Tequila', 'Whiskey', 'Bourbon', 'Scotch', 'Brandy', 'Cognac'],
+            mixers: ['Tonic', 'Soda', 'Juice', 'Syrup', 'Bitters', 'Vermouth', 'Campari', 'Cointreau'],
+            garnishes: ['Lime', 'Lemon', 'Orange', 'Mint', 'Olive', 'Cherry', 'Celery', 'Salt', 'Sugar']
+        };
+        
+        for (const category of Object.values(cocktailVocabulary)) {
+            for (const item of category) {
+                const pattern = new RegExp(this.createFuzzyPattern(item), 'gi');
+                correctedText = correctedText.replace(pattern, item);
+            }
+        }
+        
+        return correctedText;
+    }
+
+    async applyFoodCorrections(text) {
+        let correctedText = text;
+        
         // Food item correction
         for (const category of ['starters', 'entrees']) {
             for (const foodItem of this.foodVocabulary[category]) {
@@ -372,6 +427,37 @@ export class UltraEnhancedOCRService {
             const pattern = new RegExp(this.createFuzzyPattern(method), 'gi');
             correctedText = correctedText.replace(pattern, method);
         }
+        
+        return correctedText;
+    }
+
+    async applyFeaturedCorrections(text) {
+        let correctedText = text;
+        
+        // Featured/specials vocabulary
+        const featuredVocabulary = {
+            descriptors: ['Featured', 'Special', 'Chef\'s', 'Daily', 'Limited', 'Seasonal', 'Signature'],
+            categories: ['Appetizer', 'Entree', 'Dessert', 'Drink', 'Cocktail', 'Wine']
+        };
+        
+        for (const category of Object.values(featuredVocabulary)) {
+            for (const item of category) {
+                const pattern = new RegExp(this.createFuzzyPattern(item), 'gi');
+                correctedText = correctedText.replace(pattern, item);
+            }
+        }
+        
+        return correctedText;
+    }
+
+    async applyGeneralCorrections(text) {
+        let correctedText = text;
+        
+        // Apply all corrections for general menu
+        correctedText = await this.applyWineCorrections(correctedText);
+        correctedText = await this.applyCocktailCorrections(correctedText);
+        correctedText = await this.applyFoodCorrections(correctedText);
+        correctedText = await this.applyFeaturedCorrections(correctedText);
         
         return correctedText;
     }

@@ -25,6 +25,7 @@ export class AdminModule {
 
     setupOCRFunctionality() {
         const fileUpload = document.getElementById('ocrFileUpload');
+        const menuTypeSelector = document.getElementById('menuTypeSelector');
         const previewContainer = document.getElementById('ocrPreviewContainer');
         const resultContainer = document.getElementById('ocrResultContainer');
         const preview = document.getElementById('ocrPreview');
@@ -35,6 +36,13 @@ export class AdminModule {
         this.ocrService.setProgressCallback(({ percent, message }) => {
             this.updateOCRProgress(percent, message);
         });
+        
+        // Handle menu type selection
+        if (menuTypeSelector) {
+            menuTypeSelector.addEventListener('change', (e) => {
+                this.handleMenuTypeChange(e);
+            });
+        }
         
         if (fileUpload) {
             fileUpload.addEventListener('change', (e) => {
@@ -55,13 +63,53 @@ export class AdminModule {
         }
     }
 
+    handleMenuTypeChange(event) {
+        const selectedType = event.target.value;
+        const fileUpload = document.getElementById('ocrFileUpload');
+        const uploadLabel = fileUpload?.parentElement;
+        
+        if (uploadLabel) {
+            const instructionText = uploadLabel.querySelector('p:last-child');
+            if (instructionText) {
+                if (selectedType) {
+                    instructionText.textContent = `Ready to upload ${this.getMenuTypeDisplayName(selectedType)}`;
+                    instructionText.className = 'text-xs text-green-400 mt-1';
+                } else {
+                    instructionText.textContent = 'Select menu type above first';
+                    instructionText.className = 'text-xs text-gray-400 mt-1';
+                }
+            }
+        }
+    }
+
+    getMenuTypeDisplayName(type) {
+        const types = {
+            'wine': '🍷 Wine List',
+            'cocktails': '🍸 Cocktail Menu',
+            'featured': '⭐ Featured Menu',
+            'food': '🍽️ Food Menu',
+            'specials': '🎯 Daily Specials'
+        };
+        return types[type] || 'menu';
+    }
+
     handleFileUpload(event) {
         const file = event.target.files[0];
+        const menuType = document.getElementById('menuTypeSelector')?.value;
         const preview = document.getElementById('ocrPreview');
         const previewContainer = document.getElementById('ocrPreviewContainer');
         const resultContainer = document.getElementById('ocrResultContainer');
         
+        if (!menuType) {
+            this.showToast('Please select a menu type first!', 'warning');
+            event.target.value = '';
+            return;
+        }
+        
         if (file && preview && previewContainer && resultContainer) {
+            // Store menu type for OCR processing
+            this.currentMenuType = menuType;
+            
             // Optimize image before display
             this.optimizeImage(file).then(optimizedBlob => {
                 const reader = new FileReader();
@@ -70,6 +118,12 @@ export class AdminModule {
                     preview.src = e.target.result;
                     previewContainer.classList.remove('hidden');
                     resultContainer.classList.add('hidden');
+                    
+                    // Update process button text
+                    const processBtn = document.getElementById('processOcrButton');
+                    if (processBtn) {
+                        processBtn.innerHTML = `<i class="fas fa-magic mr-2"></i> Process ${this.getMenuTypeDisplayName(menuType)}`;
+                    }
                 };
                 
                 reader.readAsDataURL(optimizedBlob);
@@ -118,7 +172,12 @@ export class AdminModule {
         const ocrResult = document.getElementById('ocrResult');
         
         if (!fileUpload.files[0]) {
-            alert('Please select an image first.');
+            this.showToast('Please upload an image first!', 'warning');
+            return;
+        }
+        
+        if (!this.currentMenuType) {
+            this.showToast('Please select a menu type first!', 'warning');
             return;
         }
         
@@ -127,14 +186,17 @@ export class AdminModule {
         processBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
         
         // Show processing message
-        ocrResult.innerHTML = '<p class="text-center"><i class="fas fa-spinner fa-spin mr-2"></i> Processing image with enhanced OCR...</p>';
+        ocrResult.innerHTML = `<p class="text-center"><i class="fas fa-spinner fa-spin mr-2"></i> Processing ${this.getMenuTypeDisplayName(this.currentMenuType)} with enhanced OCR...</p>`;
         resultContainer.classList.remove('hidden');
         
         const startTime = performance.now();
         
         try {
-            // Use enhanced OCR service
-            const result = await this.ocrService.processImage(fileUpload.files[0]);
+            // Use enhanced OCR service with menu type context
+            const result = await this.ocrService.processImage(fileUpload.files[0], {
+                menuType: this.currentMenuType,
+                specializedProcessing: true
+            });
             
             const processingTime = performance.now() - startTime;
             
@@ -143,14 +205,17 @@ export class AdminModule {
                 this.app.services.monitor.trackOCRProcessing(processingTime, result.confidence);
             }
             
-            // Update state with results
+            // Update state with results and menu type context
             this.state.ocrData = {
+                menuType: this.currentMenuType,
                 redWine: result.redWine,
                 whiteWine: result.whiteWine,
                 starters: result.starters || [],
                 entrees: result.entrees || [],
                 cocktail: result.cocktail,
-                confidence: result.confidence
+                specials: result.specials || [],
+                confidence: result.confidence,
+                processedAt: new Date().toISOString()
             };
             
             // Display the results
@@ -222,6 +287,18 @@ export class AdminModule {
         if (!ocrResult) return;
         
         let resultHtml = '<div class="space-y-4">';
+        
+        // Display menu type context
+        if (this.state.ocrData.menuType) {
+            const menuTypeDisplay = this.getMenuTypeDisplayName(this.state.ocrData.menuType);
+            resultHtml += `
+                <div class="bg-blue-600 bg-opacity-20 p-3 rounded-lg mb-4 border-l-4 border-blue-400">
+                    <h4 class="font-bold text-blue-400 mb-1">📋 Menu Type: ${menuTypeDisplay}</h4>
+                    <p class="text-sm text-gray-300">Processed with specialized ${this.state.ocrData.menuType} recognition</p>
+                    ${this.state.ocrData.processedAt ? `<p class="text-xs text-gray-400 mt-1">Processed: ${new Date(this.state.ocrData.processedAt).toLocaleString()}</p>` : ''}
+                </div>
+            `;
+        }
         
         // Display wines with confidence indicators
         if (this.state.ocrData.redWine || this.state.ocrData.whiteWine) {

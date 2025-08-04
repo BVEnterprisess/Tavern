@@ -1,0 +1,28 @@
+[2025-08-04T23:53:42.044Z] [INFO] 🚀 Starting Auto-Sync Manager
+[2025-08-04T23:53:42.062Z] [INFO] ⏰ Sync interval: 300 seconds
+[2025-08-04T23:53:42.063Z] [INFO] 📝 Log file: F:\New folder (3)\Tavern\auto-sync.log
+[2025-08-04T23:53:42.064Z] [INFO] 🚀 Starting auto-sync #1
+[2025-08-04T23:53:42.065Z] [INFO] 📁 Project root: F:\New folder (3)\Tavern
+[2025-08-04T23:53:42.148Z] [INFO] ✅ Auto-sync manager is now running...
+[2025-08-04T23:53:42.149Z] [INFO] 💡 Press Ctrl+C to stop the auto-sync manager
+[2025-08-04T23:53:42.149Z] [INFO] 📝 Changes detected, proceeding with sync...
+[2025-08-04T23:53:42.150Z] [INFO] 🔄 Executing: Installing dependencies
+[2025-08-04T23:53:47.158Z] [INFO] ✅ Success: Installing dependencies
+[2025-08-04T23:53:47.160Z] [INFO] 🔄 Executing: Cleaning build directory
+[2025-08-04T23:53:47.788Z] [INFO] ✅ Success: Cleaning build directory
+[2025-08-04T23:53:47.788Z] [INFO] 🔄 Executing: Building project
+[2025-08-04T23:54:06.033Z] [INFO] 🚀 Starting Auto-Sync Manager
+[2025-08-04T23:54:06.039Z] [INFO] ⏰ Sync interval: 300 seconds
+[2025-08-04T23:54:06.040Z] [INFO] 📝 Log file: F:\New folder (3)\Tavern\auto-sync.log
+[2025-08-04T23:54:06.041Z] [INFO] 🚀 Starting auto-sync #1
+[2025-08-04T23:54:06.042Z] [INFO] 📁 Project root: F:\New folder (3)\Tavern
+[2025-08-04T23:54:06.123Z] [INFO] ✅ Auto-sync manager is now running...
+[2025-08-04T23:54:06.124Z] [INFO] 💡 Press Ctrl+C to stop the auto-sync manager
+[2025-08-04T23:54:06.125Z] [INFO] 📝 Changes detected, proceeding with sync...
+[2025-08-04T23:54:06.125Z] [INFO] 🔄 Executing: Installing dependencies
+[2025-08-04T23:54:10.925Z] [INFO] ✅ Success: Installing dependencies
+[2025-08-04T23:54:10.926Z] [INFO] 🔄 Executing: Cleaning build directory
+[2025-08-04T23:54:11.662Z] [INFO] ✅ Success: Cleaning build directory
+[2025-08-04T23:54:11.663Z] [INFO] 🔄 Executing: Building project
+[2025-08-04T23:54:24.632Z] [INFO] ✅ Success: Building project
+[2025-08-04T23:54:24.633Z] [INFO] 🔄 Executing: Staging all changes

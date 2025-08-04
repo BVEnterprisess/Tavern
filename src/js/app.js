@@ -10,6 +10,7 @@ import { AdminModule } from './modules/admin.js';
 import { WineModule } from './modules/wine.js';
 import { InventoryModule } from './modules/inventory.js';
 import { PerformanceModule } from './modules/performance.js';
+import { cocktailsManager } from './modules/cocktails.js';
 
 export class Table1837App {
     constructor() {
@@ -111,6 +112,7 @@ export class Table1837App {
         this.modules.admin = null;
         this.modules.wine = null;
         this.modules.inventory = null;
+        this.modules.cocktails = null; // Initialize cocktails module as null
         
         console.log('✅ Core modules initialized successfully');
     }
@@ -152,6 +154,13 @@ export class Table1837App {
                     this.modules.inventory.initialize();
                 }
                 module = this.modules.inventory;
+                break;
+            case 'cocktails':
+                if (!this.modules.cocktails) {
+                    this.modules.cocktails = cocktailsManager;
+                    await this.modules.cocktails.initialize();
+                }
+                module = this.modules.cocktails;
                 break;
             default:
                 module = this.modules[moduleName];
@@ -219,8 +228,9 @@ export class Table1837App {
                     case '3':
                     case '4':
                     case '5':
+                    case '6': // Add shortcut for cocktails tab
                         e.preventDefault();
-                        const tabs = ['dashboard', 'staff', 'admin', 'wine', 'inventory'];
+                        const tabs = ['dashboard', 'staff', 'admin', 'wine', 'inventory', 'cocktails'];
                         const tabIndex = parseInt(e.key) - 1;
                         if (tabIndex < tabs.length) {
                             this.showTab(tabs[tabIndex]);
@@ -485,4 +495,4 @@ export class Table1837App {
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     window.app = new Table1837App();
-}); 
+});

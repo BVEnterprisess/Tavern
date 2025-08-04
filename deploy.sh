@@ -1,43 +1,65 @@
 #!/bin/bash
 
-# Deploy script for Table 1837 Bar Management System
-echo "🚀 Starting deployment process..."
+echo "🚀 DEPLOYING TABLE 1837 BAR MANAGEMENT SYSTEM"
+echo "================================================"
 
-# Check if we're in a git repository
-if [ ! -d ".git" ]; then
-    echo "❌ Not in a git repository. Please run this from the project root."
+echo ""
+echo "📦 Installing dependencies..."
+npm install
+if [ $? -ne 0 ]; then
+    echo "❌ Failed to install dependencies"
     exit 1
 fi
 
-# Get current branch
-CURRENT_BRANCH=$(git branch --show-current)
-echo "📍 Current branch: $CURRENT_BRANCH"
+echo ""
+echo "🧹 Cleaning previous build..."
+npm run clean
+if [ $? -ne 0 ]; then
+    echo "❌ Failed to clean previous build"
+    exit 1
+fi
 
-# Stage all changes
-echo "📦 Staging all changes..."
+echo ""
+echo "🔨 Building project..."
+npm run build
+if [ $? -ne 0 ]; then
+    echo "❌ Build failed"
+    exit 1
+fi
+
+echo ""
+echo "🧪 Running tests..."
+npm test
+if [ $? -ne 0 ]; then
+    echo "❌ Tests failed"
+    exit 1
+fi
+
+echo ""
+echo "🔍 Running linting..."
+npm run lint
+if [ $? -ne 0 ]; then
+    echo "❌ Linting failed"
+    exit 1
+fi
+
+echo ""
+echo "📊 Analyzing bundle..."
+npm run analyze
+if [ $? -ne 0 ]; then
+    echo "⚠️ Bundle analysis failed, continuing..."
+fi
+
+echo ""
+echo "🚀 Deploying to Git..."
 git add .
+git commit -m "Auto-deploy: $(date)"
+git push origin main
 
-# Check if there are changes to commit
-if git diff --cached --quiet; then
-    echo "✅ No changes to commit. Everything is up to date!"
-    exit 0
-fi
-
-# Get commit message from user or use default
-if [ -z "$1" ]; then
-    COMMIT_MESSAGE="Update Table 1837 Bar Management System - $(date '+%Y-%m-%d %H:%M:%S')"
-else
-    COMMIT_MESSAGE="$1"
-fi
-
-# Commit changes
-echo "💾 Committing changes with message: $COMMIT_MESSAGE"
-git commit -m "$COMMIT_MESSAGE"
-
-# Push to remote
-echo "🚀 Pushing to remote repository..."
-git push origin $CURRENT_BRANCH
-
-echo "✅ Deployment initiated! Changes will be automatically deployed to Netlify."
-echo "🌐 Check your Netlify dashboard for deployment status."
-echo "🔗 Your site: https://table1837tavern.bar" 
+echo ""
+echo "✅ DEPLOYMENT COMPLETE"
+echo "================================================"
+echo "📍 Live site: https://table1837tavern.bar"
+echo "📊 Build status: Check Netlify dashboard"
+echo "🔧 Admin tools: Available in /admin"
+echo ""

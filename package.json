@@ -24,7 +24,10 @@
     "deploy:prod": "npm run build:prod && npm test && npm run lint && git add . && git commit -m \"Production deploy: $(date)\" && git push origin main",
     "security:audit": "npm audit && npm audit fix",
     "performance:check": "npm run analyze",
-    "health:check": "npm run test && npm run lint && npm run build"
+    "health:check": "npm run test && npm run lint && npm run build",
+    "auto-sync": "node auto-sync-every-5min.js",
+    "auto-sync:start": "node auto-sync-every-5min.js",
+    "auto-sync:status": "node -e \"const AutoSync = require('./auto-sync-every-5min.js'); console.log('Auto-sync status:', new AutoSync().getStatus());\""
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.38.0",

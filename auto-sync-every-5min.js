@@ -136,12 +136,15 @@ class AutoSyncManager {
 
         // Step 5: Push to remote (both origin and upstream for redundancy)
         const pushOriginResult = await this.executeCommand('git push origin main', 'Pushing to origin');
-        const pushUpstreamResult = await this.executeCommand('git push upstream main', 'Pushing to upstream');
+        const pushUpstreamResult = await this.executeCommand('git push upstream main', 'Pushing to upstream (Netlify monitored)');
         
         if (!pushOriginResult.success && !pushUpstreamResult.success) {
             this.log('⚠️ Warning: Failed to push to both remotes, but continuing...', 'WARN');
         } else {
             this.log('✅ Successfully pushed to at least one remote');
+            if (pushUpstreamResult.success) {
+                this.log('🎉 Successfully pushed to upstream - Netlify should auto-deploy');
+            }
         }
         if (!pushResult.success) {
             this.errorCount++;

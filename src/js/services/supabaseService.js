@@ -9,8 +9,8 @@ export class SupabaseService {
     constructor() {
         // Initialize Supabase client
         this.supabase = createClient(
-            'https://your-project-url.supabase.co', // Replace with your Supabase URL
-            'your-anon-key' // Replace with your Supabase anon key
+            'https://lontanjfuxuevvqqupsl.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFhYmFzZSIsInJlZiI6ImxvbnRhbmpmdXh1ZXZ2cXF1cHNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzNTIzNzcsImV4cCI6MjA2OTkyODM3N30.watvIC_05bZChqJ-7U4m5iRe1JIZ-XyaQRQMCcOGmic'
         );
         
         this.isConnected = false;
@@ -311,4 +311,4 @@ export class SupabaseService {
             }
         }
     }
-} 
+}

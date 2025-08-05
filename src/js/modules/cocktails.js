@@ -144,8 +144,8 @@ class CocktailsManager {
     }
 
     renderCocktails() {
-        const cocktailListDiv = document.getElementById('cocktailList');
-        if (!cocktailListDiv) return;
+    const cocktailListDiv = document.getElementById('cocktailList');
+    if (!cocktailListDiv) return;
 
         cocktailListDiv.innerHTML = '';
 
@@ -191,8 +191,8 @@ class CocktailsManager {
                         <i class="fas fa-list-ul mr-2"></i>Ingredients:
                     </h4>
                     <ul class="list-disc list-inside text-gray-300 mb-4 space-y-1">
-                        ${cocktail.ingredients.map(ingredient => `<li>${ingredient}</li>`).join('')}
-                    </ul>
+                ${cocktail.ingredients.map(ingredient => `<li>${ingredient}</li>`).join('')}
+            </ul>
                     
                     <div class="flex items-center gap-4 text-sm text-gray-400 mb-4">
                         <span><i class="fas fa-clock mr-1"></i>${cocktail.prep_time} min</span>

@@ -80,10 +80,10 @@ export class Table1837App {
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js')
                 .then(registration => {
-                    console.log('✅ Service Worker registered:', registration);
+                    // Service Worker registered successfully
                 })
                 .catch(error => {
-                    console.error('❌ Service Worker registration failed:', error);
+                    // Service Worker registration failed
                 });
         }
     }
@@ -98,7 +98,6 @@ export class Table1837App {
     }
 
     initializeModules() {
-        console.log('🚀 Initializing Table 1837 modules...');
         // Initialize only dashboard initially, others will be lazy loaded
         this.modules.dashboard = new DashboardModule(this);
         this.modules.dashboard.initialize();
@@ -113,8 +112,6 @@ export class Table1837App {
         this.modules.wine = null;
         this.modules.inventory = null;
         this.modules.cocktails = null; // Initialize cocktails module as null
-        
-        console.log('✅ Core modules initialized successfully');
     }
 
     async loadModule(moduleName) {
@@ -123,7 +120,6 @@ export class Table1837App {
         }
 
         const startTime = performance.now();
-        console.log(`🔄 Loading module: ${moduleName}`);
         
         let module;
         switch (moduleName) {
@@ -207,7 +203,7 @@ export class Table1837App {
         this.services.search = new SearchService();
         this.services.theme = new ThemeService();
         
-        console.log('🚀 Enhanced services initialized');
+        // Enhanced services initialized
     }
     
     setupEnhancedFeatures() {

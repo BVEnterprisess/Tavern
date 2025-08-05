@@ -18,16 +18,13 @@ class CocktailsManager {
 
     async initialize() {
         try {
-            console.log('🍸 Initializing Cocktails Manager...');
-            
             // Initialize Supabase service
             const supabaseConnected = await this.supabaseService.initialize();
             
             if (supabaseConnected) {
-                console.log('✅ Connected to Supabase');
                 this.setupRealtimeUpdates();
             } else {
-                console.log('⚠️ Using fallback data (Supabase not available)');
+                // Using fallback data (Supabase not available)
             }
             
             // Load initial cocktails

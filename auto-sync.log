@@ -570,3 +570,20 @@ fatal: unable to access 'https://github.com/BlackVaultEnterprises/Tavern.git/': 
 [2025-08-05T02:34:10.271Z] [INFO] 🔄 Executing: Building project
 [2025-08-05T02:34:21.505Z] [INFO] ✅ Success: Building project
 [2025-08-05T02:34:21.506Z] [INFO] 🔄 Executing: Staging all changes
+[2025-08-05T02:34:21.599Z] [INFO] ✅ Success: Staging all changes
+[2025-08-05T02:34:21.667Z] [INFO] 🔄 Executing: Committing changes
+[2025-08-05T02:34:21.837Z] [INFO] ✅ Success: Committing changes
+[2025-08-05T02:34:21.838Z] [INFO] 🔄 Executing: Pushing to remote
+[2025-08-05T02:34:21.968Z] [ERROR] ❌ Error: Pushing to remote - Command failed: git push origin main
+fatal: unable to access 'https://github.com/BlackVaultEnterprises/Tavern.git/': Could not resolve host: github.com
+
+[2025-08-05T02:39:06.284Z] [INFO] 🚀 Starting auto-sync #34
+[2025-08-05T02:39:06.284Z] [INFO] 📁 Project root: F:\New folder (3)\Tavern
+[2025-08-05T02:39:06.350Z] [INFO] 📝 Changes detected, proceeding with sync...
+[2025-08-05T02:39:06.351Z] [INFO] 🔄 Executing: Installing dependencies
+[2025-08-05T02:39:09.774Z] [INFO] ✅ Success: Installing dependencies
+[2025-08-05T02:39:09.774Z] [INFO] 🔄 Executing: Cleaning build directory
+[2025-08-05T02:39:10.317Z] [INFO] ✅ Success: Cleaning build directory
+[2025-08-05T02:39:10.318Z] [INFO] 🔄 Executing: Building project
+[2025-08-05T02:39:21.590Z] [INFO] ✅ Success: Building project
+[2025-08-05T02:39:21.590Z] [INFO] 🔄 Executing: Staging all changes

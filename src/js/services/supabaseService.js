@@ -7,9 +7,9 @@ import { createClient } from '@supabase/supabase-js';
 
 export class SupabaseService {
     constructor() {
-        // Initialize Supabase client with environment variables or fallback
-        const supabaseUrl = process.env.SUPABASE_URL || 'https://lontanjfuxuevvqqupsl.supabase.co';
-        const supabaseKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFhYmFzZSIsInJlZiI6ImxvbnRhbmpmdXh1ZXZ2cXF1cHNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzNTIzNzcsImV4cCI6MjA2OTkyODM3N30.watvIC_05bZChqJ-7U4m5iRe1JIZ-XyaQRQMCcOGmic';
+        // Initialize Supabase client with actual credentials
+        const supabaseUrl = 'https://lontanjfuxuevvqqupsl.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxvbnRhbmpmdXh1ZXZ2cXF1cHNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzNTIzNzcsImV4cCI6MjA2OTkyODM3N30.watvIC_05bZChqJ-7U4m5iRe1JIZ-XyaQRQMCcOGmic';
         
         this.supabase = createClient(supabaseUrl, supabaseKey);
         

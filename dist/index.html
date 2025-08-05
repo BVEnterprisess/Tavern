@@ -612,13 +612,37 @@
     <!-- Tab Switching Script -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('Tab switching script loaded');
+            
+            // Force cocktails tab to be visible
+            const cocktailsTab = document.querySelector('[data-tab="cocktails"]');
+            if (cocktailsTab) {
+                console.log('Cocktails tab found, ensuring visibility');
+                cocktailsTab.style.display = 'block';
+                cocktailsTab.style.visibility = 'visible';
+                cocktailsTab.style.opacity = '1';
+            } else {
+                console.log('Cocktails tab not found, adding it manually');
+                const nav = document.querySelector('nav');
+                if (nav) {
+                    const newTab = document.createElement('button');
+                    newTab.className = 'nav-tab px-4 py-2 rounded-t-lg text-sm font-medium';
+                    newTab.setAttribute('data-tab', 'cocktails');
+                    newTab.textContent = 'Cocktails';
+                    nav.insertBefore(newTab, nav.lastElementChild);
+                }
+            }
+            
             // Tab switching functionality
             const tabButtons = document.querySelectorAll('[data-tab]');
             const tabContents = document.querySelectorAll('.tab-content');
             
+            console.log('Found tab buttons:', tabButtons.length);
             tabButtons.forEach(button => {
+                console.log('Tab button:', button.textContent, button.getAttribute('data-tab'));
                 button.addEventListener('click', () => {
                     const targetTab = button.getAttribute('data-tab');
+                    console.log('Clicked tab:', targetTab);
                     
                     // Remove active class from all tabs and contents
                     tabButtons.forEach(btn => btn.classList.remove('active'));
@@ -631,6 +655,9 @@
                     const targetContent = document.getElementById(targetTab + '-content');
                     if (targetContent) {
                         targetContent.classList.remove('hidden');
+                        console.log('Showing content for:', targetTab);
+                    } else {
+                        console.log('No content found for:', targetTab);
                     }
                 });
             });
